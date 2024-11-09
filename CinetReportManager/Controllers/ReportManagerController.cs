@@ -36,14 +36,15 @@ namespace CinetReportManager.Controllers
             List<MemoryStream> streams = new List<MemoryStream>();
             Dictionary<string, Stream> streamsDictionary = new Dictionary<string, Stream>();
 
-            bool envioEmail = false;
             StringBuilder sb = new StringBuilder();
 
             try
             {
-                streamsDictionary[$"OPA_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf"] = await _reportService.GenerarReporteOrdenDePago(llamadoDto.OrdenDePago);
+                streamsDictionary[$"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf"] = await _reportService.GenerarReporteOrdenDePago(llamadoDto.OrdenDePago);
 
                 if (!streamsDictionary.Any()) throw new Exception("Error al generar el reporte de la orden de pago.");
+
+                sb.AppendLine($"Se generó el reporte del comprobante {llamadoDto.OrdenDePago.CodigoComprobante} número {llamadoDto.OrdenDePago.NumeroComprobanteOPA}.");
 
                 if (llamadoDto.Retenciones is not null && llamadoDto.Retenciones.Any())
                 {
@@ -64,13 +65,11 @@ namespace CinetReportManager.Controllers
                 try
                 {
                     await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);
-                    sb.AppendLine("La generación del reporte y envío del email fue correcta.");
-                    envioEmail = true;
+                    sb.AppendLine("El envío del email fue correcto.");
                 }
                 catch (Exception ex)
                 {
                     sb.AppendLine($"Se generó el reporte, sin embargo el envío del email falló por: {ex.Message}");
-                    envioEmail = false;
                 }
 
                 return Ok(new

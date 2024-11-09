@@ -77,7 +77,7 @@ namespace AvisoReporte
                 var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
 
                 // Generación de Log para aviso a usuario:
-                Log.Information($"Se hizo el llamado correctamente: {respuestaLlamado}");
+                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
             }
             catch (Exception ex)
             {
@@ -121,7 +121,7 @@ namespace AvisoReporte
                 var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
 
                 // Generación de Log para aviso a usuario:
-                Log.Information($"Se hizo el llamado correctamente: {respuestaLlamado}");
+                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace AvisoReporte
 
                 var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
 
-                Log.Information($"Se hizo el llamado correctamente: {respuestaLlamado}");
+                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
             }
             catch (Exception ex)
             {
@@ -169,7 +169,7 @@ namespace AvisoReporte
 
                 var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(retenciones);
 
-                Log.Information($"Se hizo el llamado correctamente: {respuestaLlamado}");
+                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
             }
             catch (Exception ex)
             {

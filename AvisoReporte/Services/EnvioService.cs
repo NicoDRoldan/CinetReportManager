@@ -28,7 +28,9 @@ namespace AvisoReporte.Services
                 string json = JsonConvert.SerializeObject(llamadoDto);
                 StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://localhost:{_PortApi}/api/ReportManager/GenerarReporte", contenido);
-                
+
+                Log.Information($"Json enviado:\n {json}");
+
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
 
@@ -56,6 +58,8 @@ namespace AvisoReporte.Services
                 string json = JsonConvert.SerializeObject(retenciones);
                 StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://localhost:{_PortApi}/api/ReportManager/GenerarRetencion", contenido);
+
+                Log.Information($"Json enviado:\n {json}");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
