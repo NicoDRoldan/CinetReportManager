@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <ApplicationIcon>Icono_Cinet.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Fonts\calisto-mt.ttf" />
+    <None Remove="Resources\Fonts\CourierNewRegular.ttf" />
+    <None Remove="Resources\Fonts\NimbusMonoLBold.ttf" />
+    <None Remove="Resources\Fonts\NimbusMonoLRegular.ttf" />
+    <None Remove="Resources\Fonts\TimesNewRomanBold.ttf" />
+    <None Remove="Resources\Fonts\TimesNewRomanRegular.ttf" />
+    <None Remove="Resources\Fonts\TYPEWR_B.TTF" />
+    <None Remove="Resources\Images\firma.bmp" />
+    <None Remove="Resources\Images\LogoMostaza.bmp" />
+    <None Remove="Resources\Images\LogoMostaza.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icono_Cinet.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Fonts\calisto-mt.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\CourierNewRegular.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\NimbusMonoLBold.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\NimbusMonoLRegular.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\TimesNewRomanBold.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\TimesNewRomanRegular.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\TYPEWR_B.TTF" />
+    <EmbeddedResource Include="Resources\Images\firma.bmp" />
+    <EmbeddedResource Include="Resources\Images\LogoMostaza.bmp" />
+    <EmbeddedResource Include="Resources\Images\LogoMostaza.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Humanizer" Version="2.14.1" />
+    <PackageReference Include="itext7" Version="8.0.5" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+  </ItemGroup>
+
+</Project>
