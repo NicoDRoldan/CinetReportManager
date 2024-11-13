@@ -143,9 +143,12 @@ namespace CinetReportManager.Services
 
         public async Task<MemoryStream> GenerarReporteRetencion(RetencionModel retencion)
         {
+            _numeroComprobante = retencion.RetencionPracticada.NumeroComprobante;
+            _codComprobante = retencion.RetencionPracticada.TipoComprobante;
+
             string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{_codComprobante}_{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {

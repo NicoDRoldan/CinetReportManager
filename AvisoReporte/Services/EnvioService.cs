@@ -16,18 +16,18 @@ namespace AvisoReporte.Services
 {
     public class EnvioService : IEnvioService
     {
-        private readonly string _PortApi = ConfigurationManager.AppSettings["PuertoReportManager"];
+        private readonly string _HostApi = string.IsNullOrEmpty(ConfigurationManager.AppSettings["HostReportManager"]) ? "localhost" : ConfigurationManager.AppSettings["HostReportManager"];
+        private readonly string _PortApi = string.IsNullOrEmpty(ConfigurationManager.AppSettings["PuertoReportManager"]) ? "7253" : ConfigurationManager.AppSettings["PuertoReportManager"];
 
         public async Task<string> LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
         {
             try
             {
-                //string api = ConfigurationManager.AppSettings["PuertoReportManager"] ?? throw new Exception("No hay un puerto asignado para el llamado.");
                 HttpClient cliente = new HttpClient();
 
                 string json = JsonConvert.SerializeObject(llamadoDto);
                 StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://localhost:{_PortApi}/api/ReportManager/GenerarReporte", contenido);
+                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://{_HostApi}:{_PortApi}/api/ReportManager/GenerarReporte", contenido);
 
                 Log.Information($"Json enviado:\n {json}");
 
@@ -57,7 +57,7 @@ namespace AvisoReporte.Services
 
                 string json = JsonConvert.SerializeObject(retenciones);
                 StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://localhost:{_PortApi}/api/ReportManager/GenerarRetencion", contenido);
+                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://{_HostApi}:{_PortApi}/api/ReportManager/GenerarRetencion", contenido);
 
                 Log.Information($"Json enviado:\n {json}");
 
