@@ -31,14 +31,18 @@ namespace CinetReportManager.Services
     {
         private readonly IOrdenDePagoService _ordenDePagoService;
         private readonly IRetencionService _retencionService;
+        private readonly IConfiguration _configuration;
 
         private string _numeroComprobante;
         private string _codComprobante;
+        private string _rutaReporte;
 
-        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService)
+        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration)
         {
             _ordenDePagoService = ordenDePagoService;
             _retencionService = retencionService;
+            _configuration = configuration;
+            _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
         }
 
         public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago)
@@ -46,11 +50,11 @@ namespace CinetReportManager.Services
             _numeroComprobante = ordenDePago.NumeroComprobanteOPA;
             _codComprobante = ordenDePago.CodigoComprobante;
 
-            string rutaCarpetaRaiz = @$"C:\Cinet\Profit\OPA";
+            string rutaCarpetaRaiz = @$"{_rutaReporte}";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
 
-            string rutaArchivo = @$"C:\Cinet\Profit\OPA\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
-            string rataCarpeta = @$"C:\Cinet\Profit\OPA\{_codComprobante}_{_numeroComprobante}";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
+            string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}";
 
             if (!Directory.Exists(rataCarpeta)) Directory.CreateDirectory(rataCarpeta);
 
@@ -139,9 +143,9 @@ namespace CinetReportManager.Services
 
         public async Task<MemoryStream> GenerarReporteRetencion(RetencionModel retencion)
         {
-            string rutaCarpetaRaiz = @$"C:\Cinet\Profit\OPA\{_codComprobante}_{_numeroComprobante}\Retenciones";
+            string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"C:\Cinet\Profit\OPA\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {
