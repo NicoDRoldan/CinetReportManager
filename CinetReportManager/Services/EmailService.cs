@@ -26,6 +26,7 @@ namespace CinetReportManager.Services
 
         public async Task EnviarEmailAProveedor(List<string> emailsProveedores, string nroComprobanteOpa, Dictionary<string, Stream> streamsDictionary)
         {
+            // Obtener datos del archivo de configuración
             Email_Desde = _configuration.GetValue<string>("EmailConfig:Email")!;
             Clave_Email = _configuration.GetValue<string>("EmailConfig:PassEmail")!;
             Servicio_Email = _configuration.GetValue<string>("EmailConfig:ServerEmail")!;
@@ -45,27 +46,28 @@ namespace CinetReportManager.Services
             {
                 /* Configuración del cliente para el envío */
                 SmtpClient smtpClient = new SmtpClient(Servicio_Email);
-                smtpClient.UseDefaultCredentials = false;
-                if (Servicio_Email == "smtp.gmail.com")
-                {
-                    smtpClient.Port = 587;
-                    smtpClient.Credentials = new NetworkCredential(Email_Desde, Clave_Email);
-                    smtpClient.EnableSsl = true;
-                }
-                else
-                {
-                    smtpClient.Port = PuertoEmail;
-                    smtpClient.Credentials = new NetworkCredential(Email_Desde, Clave_Email);
-                    smtpClient.EnableSsl = EnableSsl;
-                }
 
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Port = PuertoEmail;
+                smtpClient.Credentials = new NetworkCredential(Email_Desde, Clave_Email);
+                smtpClient.EnableSsl = EnableSsl;
+
+                // Se instancia el objeto MailMessage
                 var message = new MailMessage();
+
+                // Email que envía
                 message.From = new MailAddress(Email_Desde);
+
+                // Destinatarios
                 foreach (var email in emailsProveedores)
                 {
                     message.To.Add(email);
                 }
+
+                // Asunto
                 message.Subject = $"Orden de pago {nroComprobanteOpa}";
+
+                // Convertir Body en HTML
                 message.IsBodyHtml = true;
                 string bodyHtml = $@"
                     <html>
@@ -78,7 +80,8 @@ namespace CinetReportManager.Services
                     </html>
                     </body>";
 
-                using Stream streamImagen = Assembly.GetExecutingAssembly().GetManifestResourceStream("CinetReportManager.Resources.Images.LogoMostaza.jpg") ?? throw new Exception("Error la cargar el recurso");
+                // Agregar imagen al HTML
+                using Stream streamImagen = Assembly.GetExecutingAssembly().GetManifestResourceStream("CinetReportManager.Resources.Images.LogoMostaza.bmp") ?? throw new Exception("Error la cargar el recurso");
                 using MemoryStream rutaImagen = new MemoryStream();
                 streamImagen.CopyTo(rutaImagen);
                 rutaImagen.Position = 0;
@@ -90,6 +93,7 @@ namespace CinetReportManager.Services
                 avHtml.LinkedResources.Add(imagen);
                 message.AlternateViews.Add(avHtml);
 
+               // Agregar archivos adjuntos
                 foreach(var dic in streamsDictionary)
                 {
                     var nombreArchivo = dic.Key;
@@ -97,6 +101,7 @@ namespace CinetReportManager.Services
                     var adjunto = new Attachment(stream, nombreArchivo);
                     message.Attachments.Add(adjunto);
                 }
+
                 await smtpClient.SendMailAsync(message);
             }
             catch (Exception ex)

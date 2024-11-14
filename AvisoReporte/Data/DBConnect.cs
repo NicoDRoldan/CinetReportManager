@@ -12,11 +12,12 @@ namespace AvisoReporte.Data
 {
     public class DBConnect
     {
-        private static string Base_Odbc { get; set; }
+        public static string Base_Odbc { get; set; }
         private static string User_Odbc { get; set; }
         private static string Pass_Odbc { get; set; }
         private static string Tipo_Conexion_Config { get; set; }
-        private static string Empresa_Config { get; set; }
+        public string Empresa_Config { get; set; }
+        public bool UsaConfig { get; set; } = true;
 
         public async Task<string> ObtenerStringConexion()
         {
@@ -28,8 +29,7 @@ namespace AvisoReporte.Data
         public async Task ConfigurarDatosEmpresa()
         {
             Tipo_Conexion_Config = ConfigurationManager.AppSettings["TipoConexion"] is null ? "2" : ConfigurationManager.AppSettings["TipoConexion"];
-            Empresa_Config = ConfigurationManager.AppSettings["Empresa"] is null ? "2" : ConfigurationManager.AppSettings["Empresa"];
-
+            
             switch (Tipo_Conexion_Config)
             {
                 case "1":
@@ -40,6 +40,16 @@ namespace AvisoReporte.Data
                     break;
                 default:
                     throw new Exception("No se estableció la conexión.");
+            }
+
+            // Si la propiedad UsaConfig es true, Empresa_Config toma el valor de Empresa, caso contrario toma el valor de Empresa_Sec
+            if (UsaConfig)
+            {
+                Empresa_Config = ConfigurationManager.AppSettings["Empresa"] is null ? "2" : ConfigurationManager.AppSettings["Empresa"];
+            }
+            else
+            {
+                Empresa_Config = ConfigurationManager.AppSettings["Empresa_Sec"] is null ? "2" : ConfigurationManager.AppSettings["Empresa_Sec"];
             }
 
             switch (Empresa_Config)
@@ -62,10 +72,13 @@ namespace AvisoReporte.Data
                 case "6":
                     Base_Odbc = "DAFIRUZ_ERP";
                     break;
+                case "7":
+                    Base_Odbc = "GALDEANO_ERP";
+                    break;
                 case "100":
                     Base_Odbc = "TEST_ERP";
                     break;
-                default: 
+                default:
                     throw new Exception("No se indicó una Empresa a la que conectarse.");
             }
         }

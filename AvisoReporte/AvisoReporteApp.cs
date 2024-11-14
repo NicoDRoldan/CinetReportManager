@@ -94,7 +94,7 @@ namespace AvisoReporte
 
                 // Obtener los datos de la Orden de pago
                 OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail);
+                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail, true);
 
                 // Si la orden de pago es null, se lanza excepción
                 if (opa is null) throw new Exception("No se encontró una orden de pago");
@@ -135,7 +135,7 @@ namespace AvisoReporte
             try
             {
                 OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail);
+                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail, true);
 
                 if (opa == null) throw new Exception("No se encontró una orden de pago");
 
@@ -161,7 +161,7 @@ namespace AvisoReporte
             try
             {
                 OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor);
+                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, false, true);
 
                 if (opa == null) throw new Exception("No se encontró una orden de pago");
 

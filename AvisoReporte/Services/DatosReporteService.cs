@@ -1,4 +1,5 @@
-﻿using AvisoReporte.Data;
+﻿using System.Configuration;
+using AvisoReporte.Data;
 using AvisoReporte.Interfaces;
 using AvisoReporte.Models;
 using System;
@@ -22,13 +23,13 @@ namespace AvisoReporte.Services
             _conn = conn;
         }
 
-        public async Task<OrdenDePagoModel> ObtenerOrdenDePago(string cod_Comprobante, string num_Comprobante, string cod_Sucursal, string cod_Proveedor, bool enviaEmail = true)
+        public async Task<OrdenDePagoModel> ObtenerOrdenDePago(string cod_Comprobante, string num_Comprobante, string cod_Sucursal, string cod_Proveedor, bool enviaEmail = true, bool esConsulta = false)
         {
             List<string> parametros = new List<string> { cod_Comprobante, num_Comprobante, cod_Sucursal };
             try
             {
                 // Obtener datos de comprobantes: CBTEE_CODIGO, EGRE_NUMERO y SUC_CODIGO
-                DataTable datosComprobante = await ObtenerDatosDeComprobante(parametros);
+                DataTable datosComprobante = await ObtenerDatosDeComprobante(parametros, esConsulta);
                 if (datosComprobante.Rows.Count == 0) throw new Exception("No se encontraron comprobantes.");
 
                 // Obtener datos del proveedor.
@@ -167,11 +168,35 @@ namespace AvisoReporte.Services
             return clavesComprobantes;
         }
 
-        public async Task<DataTable> ObtenerDatosDeComprobante(List<string> parametros)
+        public async Task<DataTable> ObtenerDatosDeComprobante(List<string> parametros, bool esConsulta = false)
         {
-            var consulta = @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
+            // Si esConsulta el falso, además se filtra la obtención del comprobante por fecha, para asegurarse de estar 
+            // buscando el registro correcto. Si no se encuentra el registro, significa que se está trabajando sobre una base de datos diferente.
+            var fecha = DateOnly.FromDateTime(DateTime.Now).ToString("dd/MM/yyyy");
+            var consulta = @$"SET DATEFORMAT DMY 
+                                    SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
+                                    WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ?
+                                    AND CONVERT(DATE, EGRE_FECHA) = '{fecha}' ;";
+
+            // Caso contrario, únicamente busca por las claves primarías.
+            if (esConsulta)
+            {
+                consulta = @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
                                     WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? ;";
-            return await _conn.ObtenerRegistrosAsync(consulta, parametros) ?? throw new Exception("No se obtuvieron datos de comprobantes.");
+            }
+
+            var resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros);
+
+            // Si la query no trajo resultados, y no es una consulta. Hace la busqueda en una 
+            // base de datos secundaria.
+            // (a partir de este momento, el programara trabajará con esa base de datos secundaria).
+            if ((resultado is null || resultado.Rows.Count == 0) && !esConsulta)
+            {
+                _conn.UsaConfig = false;
+                resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros) ?? throw new Exception("No se obtuvieron datos de comprobantes.");
+            }
+
+            return resultado;
         }
 
         public async Task<DataTable> ObtenerDatosDeProveedor(string codProveedor)
@@ -214,20 +239,5 @@ namespace AvisoReporte.Services
             string consulta = sb.ToString();
             return await _conn.ObtenerRegistrosAsync(consulta, parametros) ?? throw new Exception("No se obtuvieron datos de valores.");
         }
-
-        /* Deprecado
-        public async Task<string> ObtenerConsultaDatosDeComprobante(string codComprobante, string nroComprobante, string codSucursal)
-        {
-            switch (codComprobante)
-            {
-                case "OPA":
-                    return @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E WHERE EGRE_NUMERO = '{nroComprobante}'
-                                AND CBTEEG_CODIGO = 'OPA' AND ETAL_CODIGO = '01' AND CBTEEGSUC_CODIGO = '{codSucursal}';";
-                default:
-                    //throw new Exception("No hay consultas para este tipo de comprobante.");
-                    return @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E WHERE EGRE_NUMERO = '{nroComprobante}'
-                                AND CBTEEG_CODIGO = '{codComprobante}' AND ETAL_CODIGO = '01' AND CBTEEGSUC_CODIGO = '{codSucursal}';";
-            }
-        }*/
     }
 }
