@@ -66,6 +66,10 @@ namespace AvisoReporte.Services
                         ordenDePago.EmailsProveedores.Add(email.Trim());
                     }
                 }
+                else if(!string.IsNullOrEmpty(emailProveedores))
+                {
+                    ordenDePago.EmailsProveedores.Add(emailProveedores);
+                }
 
                 if (!string.IsNullOrEmpty(emailProveedores) && !enviaEmail)
                 {
