@@ -31,8 +31,7 @@ Log.Logger = new LoggerConfiguration()
                 .CreateLogger();
 
 var app = host.Services.GetRequiredService<AvisoReporteApp>();
-//await app.AvisoReporte("014690OPA012100149099");
-await app.AvisoReporte("013291OPA012100149123");
+
 if (args.Length > 0)
 {
     //Formado esperado: 009840OPA999900000001
