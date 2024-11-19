@@ -87,7 +87,8 @@ namespace AvisoReporte.Services
                         {
                             RazonSocialSujeto = datosProveedor.Rows[0]["PRO_LGLNOMBRE"].ToString(),
                             CuitSujeto = datosProveedor.Rows[0]["PRO_LGLCUIT"].ToString(),
-                            DireccionRetenido = @$"{datosProveedor.Rows[0]["PRO_LGLDIRECCION"].ToString().Trim()} {datosProveedor.Rows[0]["PRO_LGLLOCALIDAD"].ToString().Trim()} {datosProveedor.Rows[0]["PROVIN_CODIGO"].ToString().Trim()}"
+                            DireccionRetenido = @$"{datosProveedor.Rows[0]["PRO_LGLDIRECCION"].ToString().Trim()} {datosProveedor.Rows[0]["PRO_LGLLOCALIDAD"].ToString().Trim()} {datosProveedor.Rows[0]["PROVIN_CODIGO"].ToString().Trim()}",
+                            CodigoProveedor = datosProveedor.Rows[0]["PRO_CODIGO"].ToString(),
                         },
                         RetencionPracticada = new RetencionPracticadaModel()
                         {
@@ -238,7 +239,7 @@ namespace AvisoReporte.Services
             List<string> parametros = new List<string> { cod_proveedor };
             try
             {
-                string consulta = @$"SELECT PRO_LGLNOMBRE, PRO_LGLCUIT, PRO_LGLDIRECCION, PRO_LGLLOCALIDAD, PROVIN_CODIGO FROM PROVEEDORES WHERE PRO_CODIGO = ? ";
+                string consulta = @$"SELECT PRO_CODIGO, PRO_LGLNOMBRE, PRO_LGLCUIT, PRO_LGLDIRECCION, PRO_LGLLOCALIDAD, PROVIN_CODIGO FROM PROVEEDORES WHERE PRO_CODIGO = ? ";
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametros);
                 return registros;
             }

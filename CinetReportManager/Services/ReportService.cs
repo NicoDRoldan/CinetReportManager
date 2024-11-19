@@ -147,6 +147,7 @@ namespace CinetReportManager.Services
         {
             _numeroComprobante = retencion.RetencionPracticada.NumeroComprobante;
             _codComprobante = retencion.RetencionPracticada.TipoComprobante;
+            _codProveedor = retencion.SujetoRetenido.CodigoProveedor;
 
             string rutaCarpetaRaiz = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);

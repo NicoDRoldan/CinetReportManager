@@ -5,5 +5,6 @@
         public string RazonSocialSujeto { get; set; }
         public string CuitSujeto { get; set; }
         public string DireccionRetenido { get; set; }
+        public string CodigoProveedor { get; set; }
     }
 }
