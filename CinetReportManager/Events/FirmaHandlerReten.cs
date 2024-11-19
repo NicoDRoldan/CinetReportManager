@@ -42,27 +42,30 @@ namespace CinetReportManager.Events
             PdfDocument pdfDoc = docEvent.GetDocument();
             PdfPage page = docEvent.GetPage();
 
-            ImageData imageData = ImageDataFactory.Create(_firma);
-            Image firma = new Image(imageData);
-
             int numPagina = pdfDoc.GetPageNumber(docEvent.GetPage());
 
             Rectangle pageSizeFirma = new Rectangle(25, page.GetPageSize().GetTop() - 800, page.GetPageSize().GetWidth() - 72, 100);
             Rectangle pageSizeAclaracion = new Rectangle(36, page.GetPageSize().GetTop() - 890, page.GetPageSize().GetWidth() - 72, 100);
             Rectangle pageSizeImporte = new Rectangle(20, page.GetPageSize().GetTop() - 930, page.GetPageSize().GetWidth() - 72, 100);
 
-            Canvas canvasFirma = new Canvas(page, pageSizeFirma);
-            Canvas canvasAclaracion = new Canvas(page, pageSizeAclaracion);
+            if(!_retencion.AgenteRetencion.Denominacion.Contains("GALDEANO"))
+            {
+                ImageData imageData = ImageDataFactory.Create(_firma);
+                Image firma = new Image(imageData);
 
-            Cell celdaFirma = new Cell().Add(firma.SetWidth(80).SetHeight(120).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER);
-            canvasFirma.Add(celdaFirma);
-            canvasFirma.Close();
+                Canvas canvasFirma = new Canvas(page, pageSizeFirma);
+                Canvas canvasAclaracion = new Canvas(page, pageSizeAclaracion);
 
-            Cell celdaAclaracion = new Cell().Add(new Paragraph(_aclaracion_firma).SetWidth(120).SetFontSize(8).SetCharacterSpacing(1)
-                .SetFont(PdfFontFactory.CreateFont(_fuentes[0], PdfEncodings.WINANSI)).SetTextAlignment(TextAlignment.CENTER).SetHorizontalAlignment(HorizontalAlignment.RIGHT))
-                .SetBorder(Border.NO_BORDER);
-            canvasAclaracion.Add(celdaAclaracion);
-            canvasAclaracion.Close();
+                Cell celdaFirma = new Cell().Add(firma.SetWidth(80).SetHeight(120).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER);
+                canvasFirma.Add(celdaFirma);
+                canvasFirma.Close();
+
+                Cell celdaAclaracion = new Cell().Add(new Paragraph(_aclaracion_firma).SetWidth(120).SetFontSize(8).SetCharacterSpacing(1)
+                    .SetFont(PdfFontFactory.CreateFont(_fuentes[0], PdfEncodings.WINANSI)).SetTextAlignment(TextAlignment.CENTER).SetHorizontalAlignment(HorizontalAlignment.RIGHT))
+                    .SetBorder(Border.NO_BORDER);
+                canvasAclaracion.Add(celdaAclaracion);
+                canvasAclaracion.Close();
+            }
 
             if (!_reportePrincipal)
             {

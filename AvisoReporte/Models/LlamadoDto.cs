@@ -9,6 +9,7 @@ namespace AvisoReporte.Models
 {
     public class LlamadoDto
     {
+        public string? BaseEmpresa { get; set; }
         public virtual OrdenDePagoModel OrdenDePago { get; set; }
         public virtual ICollection<RetencionModel>? Retenciones { get; set; }
     }

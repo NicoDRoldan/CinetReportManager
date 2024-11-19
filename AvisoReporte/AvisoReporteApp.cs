@@ -69,6 +69,7 @@ namespace AvisoReporte
                 // Se guardan los datos en llamadoDto, que es el modelo que se enviará a CinetReportManager
                 LlamadoDto llamadoDto = new LlamadoDto()
                 {
+                    BaseEmpresa = _conn.Base_Odbc ?? null,
                     OrdenDePago = opa,
                     Retenciones = retenciones is not null ? retenciones : null
                 };
@@ -113,6 +114,7 @@ namespace AvisoReporte
                 // Se guardan los datos en llamadoDto, que es el modelo que se enviará a CinetReportManager
                 LlamadoDto llamadoDto = new LlamadoDto()
                 {
+                    BaseEmpresa = _conn.Base_Odbc ?? null,
                     OrdenDePago = opa,
                     Retenciones = retenciones is not null ? retenciones : null
                 };
@@ -141,6 +143,7 @@ namespace AvisoReporte
 
                 LlamadoDto llamadoDto = new LlamadoDto()
                 {
+                    BaseEmpresa = _conn.Base_Odbc ?? null,
                     OrdenDePago = opa,
                     Retenciones = null
                 };

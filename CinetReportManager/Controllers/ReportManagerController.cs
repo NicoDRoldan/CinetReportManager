@@ -40,7 +40,7 @@ namespace CinetReportManager.Controllers
 
             try
             {
-                streamsDictionary[$"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf"] = await _reportService.GenerarReporteOrdenDePago(llamadoDto.OrdenDePago);
+                streamsDictionary[$"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf"] = await _reportService.GenerarReporteOrdenDePago(llamadoDto.OrdenDePago, llamadoDto.BaseEmpresa);
 
                 if (!streamsDictionary.Any()) throw new Exception("Error al generar el reporte de la orden de pago.");
 
@@ -52,9 +52,16 @@ namespace CinetReportManager.Controllers
                     {
                         foreach (var retencion in llamadoDto.Retenciones)
                         {
-                            string nombreArchivo = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
-                            streamsDictionary[nombreArchivo] = await _reportService.GenerarReporteRetencion(retencion);
-                            sb.AppendLine($"La generación de la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion} fue correcta");
+                            try
+                            {
+                                string nombreArchivo = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
+                                streamsDictionary[nombreArchivo] = await _reportService.GenerarReporteRetencion(retencion);
+                                sb.AppendLine($"La generación de la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion} fue correcta");
+                            }
+                            catch (Exception ex)
+                            {
+                                sb.AppendLine($"Error en la generación de al retención {retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}. Validar. {ex.Message}");
+                            }
                         }
                     }
                     catch(Exception ex)

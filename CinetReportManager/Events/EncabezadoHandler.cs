@@ -22,14 +22,17 @@ namespace CinetReportManager.Events
         Document _document;
         byte[] _rutaImagen;
         List<byte[]> _fonts;
+        string? _baseEmpresa;
 
-        public EncabezadoHandler(IOrdenDePagoService ordenDePagoService, OrdenDePagoModel ordenDepago, Document document, byte[] rutaImagen, List<byte[]> fonts)
+        public EncabezadoHandler(IOrdenDePagoService ordenDePagoService, OrdenDePagoModel ordenDepago, Document document, byte[] rutaImagen, List<byte[]> fonts
+            , string? baseEmpresa = null)
         {
             _ordenDePagoService = ordenDePagoService;
             _ordenDepago = ordenDepago;
             _document = document;
             _rutaImagen = rutaImagen;
             _fonts = fonts;
+            _baseEmpresa = baseEmpresa;
         }
 
         public void HandleEvent(Event @event)
@@ -38,12 +41,6 @@ namespace CinetReportManager.Events
             PdfDocument pdfDoc = docEvent.GetDocument();
             PdfPage page = docEvent.GetPage();
 
-            //int numPagina = pdfDoc.GetPageNumber(docEvent.GetPage());
-            //if(numPagina != 1)
-            //{
-            //    _document.SetMargins(110, 15, 250, 5);
-            //}
-
             Rectangle rootArea = new Rectangle(
                 5,  // margen izquierdo
                 page.GetPageSize().GetTop() - 105, // margen superior
@@ -51,7 +48,12 @@ namespace CinetReportManager.Events
                 100  // altura del encabezado
             );
             Canvas canvas = new Canvas(page, rootArea);
-            canvas.Add(_ordenDePagoService.TablaEncabezado(_ordenDepago, _rutaImagen, _fonts[0]));
+
+            // Si la empresa es GALDEANO_ERP, la cabecera será diferente.
+            if (!string.IsNullOrEmpty(_baseEmpresa) && _baseEmpresa == "GALDEANO_ERP")
+                canvas.Add(_ordenDePagoService.TablaEncabezado(_ordenDepago, _fonts, _baseEmpresa));
+            else
+                canvas.Add(_ordenDePagoService.TablaEncabezado(_ordenDepago, _rutaImagen, _fonts[0]));
 
             Canvas canvas1 = new Canvas(page, rootArea.SetY(650));
             canvas1.Add(_ordenDePagoService.TablaProveedor(_ordenDepago));

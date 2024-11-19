@@ -20,6 +20,11 @@ namespace AvisoReporte.Services
             _conn = conn;
         }
 
+        private string _Denominacion;
+        private string _DireccionAgente;
+        private string _IvaAgente;
+        private string _CuitAgente;
+
         public async Task<List<RetencionModel>> ObtenerRetencion(OrdenDePagoModel ordenDePago, string? retencionFiltro = null)
         {
             List<RetencionModel> lstRetenciones = new List<RetencionModel>();
@@ -62,6 +67,8 @@ namespace AvisoReporte.Services
 
                     DataTable datosProveedor = await ObtenerDatosProveedor(ordenDePago.CodigoProveedor);
 
+                    await ValidarDatosAgentesDeRetencion(_conn.Base_Odbc);
+
                     // Por cada número de retención, se creará un nuevo modelo que posteriormente se agregará a una lista de retenciones
                     RetencionModel retencion = new RetencionModel()
                     {
@@ -71,10 +78,10 @@ namespace AvisoReporte.Services
                         IB = "901-039363-6", // Dato hardcodeado
                         AgenteRetencion = new AgenteRetencionModel()
                         {
-                            Denominacion = "Mostaza y Pan S.A", // Dato hardcodeado
-                            DireccionAgente = "Au. Bs.As. - La Plata Km.9 Local 1003, Avellaneda - Pcía de Buenos Aires.", // Dato hardcodeado
-                            IvaAgente = "Responsable Inscripto", // Dato hardcodeado
-                            CuitAgente = "33-70701313-9" // Dato hardcodeado
+                            Denominacion = _Denominacion,
+                            DireccionAgente = _DireccionAgente,
+                            IvaAgente = _IvaAgente,
+                            CuitAgente = _CuitAgente
                         },
                         SujetoRetenido = new SujetoRetenidoModel()
                         {
@@ -127,6 +134,24 @@ namespace AvisoReporte.Services
                     break;
             }
             return tipo_impuesto;
+        }
+
+        public async Task ValidarDatosAgentesDeRetencion(string? baseEmpresa = null)
+        {
+            if(!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GALDEANO_ERP")
+            {
+                _Denominacion = "GALDEANO ALVARADO CHRISTIAN DANIEL"; // Dato hardcodeado
+                _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
+                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                _CuitAgente = "20-23426454-1"; // Dato hardcodeado
+            }
+            else
+            {
+                _Denominacion = "Mostaza y Pan S.A"; // Dato hardcodeado
+                _DireccionAgente = "Au. Bs.As. - La Plata Km.9 Local 1003, Avellaneda - Pcía de Buenos Aires."; // Dato hardcodeado
+                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                _CuitAgente = "33-70701313-9"; // Dato hardcodeado
+            }
         }
 
         public async Task<DataTable> ObtenerNumerosDeRetenciones(List<string> parametros, string? retencionFiltro = null)

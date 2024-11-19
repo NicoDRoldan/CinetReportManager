@@ -21,12 +21,17 @@ namespace CinetReportManager.Services
         int General_Size = 9;
         int Header_Size = 10;
 
+        string _Razon_Social_Empresa;
+        string _Direccion_Empresa;
+        string _Telefono_Empresa;
+        string _Tipo_Comprobante;
+
         public Table TablaEncabezado(OrdenDePagoModel ordenDePago, byte[] rutaImagen, byte[] rutaFont)
         {
-            string Razon_Social_Empresa = "MOSTAZA Y PAN S.A.";
-            string Direccion_Empresa = "Av Ing Huergo 953 P.11 CABA C1107AOJ";
-            string Telefono_Empresa = "3754-2200";
-            string Tipo_Comprobante = "Orden de Pago";
+            _Razon_Social_Empresa = "MOSTAZA Y PAN S.A.";
+            _Direccion_Empresa = "Av Ing Huergo 953 P.11 CABA C1107AOJ";
+            _Telefono_Empresa = "3754-2200";
+            _Tipo_Comprobante = "Orden de Pago";
 
             // Se crea la tabla con 3 columnas.
             Table tablaEncabezado = new Table(new float[] { 1, 3, 1 });
@@ -45,20 +50,65 @@ namespace CinetReportManager.Services
              * de una celda que a su vez estará contenida dentro de otra tabla */
             Table tablaDatosEmpresa = new Table(1);
             Cell celdaDatosEmpresa = new Cell().SetBorder(Border.NO_BORDER);
-            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(Razon_Social_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(18)
+
+            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(_Razon_Social_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(18)
                 .SetFont(PdfFontFactory.CreateFont(rutaFont, PdfEncodings.WINANSI)));
-            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(Direccion_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(10));
-            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph($"Teléfono: {Telefono_Empresa}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(10));
+            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(_Direccion_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(10));
+            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph($"Teléfono: {_Telefono_Empresa}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER).SetFontSize(10));
+
             celdaDatosEmpresa.Add(tablaDatosEmpresa);
             tablaEncabezado.AddCell(celdaDatosEmpresa);
 
             Table tablaInfoComprobante = new Table(1);
             Cell celdaInfoComprobante = new Cell().SetBorder(Border.NO_BORDER);
-            tablaInfoComprobante.AddCell(new Cell().Add(new Paragraph($"{Tipo_Comprobante} {ordenDePago.NumeroComprobanteOPA}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.RIGHT).SetFontSize(12));
+
+            tablaInfoComprobante.AddCell(new Cell().Add(new Paragraph($"{_Tipo_Comprobante} {ordenDePago.NumeroComprobanteOPA}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.RIGHT).SetFontSize(12));
             tablaInfoComprobante.AddCell(new Cell().Add(new Paragraph($"Fecha: {DateOnly.FromDateTime(ordenDePago.FechaOPA)}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.RIGHT).SetFontSize(10)
                 .SetPaddingTop(20).SetPaddingRight(10)
                 .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)));
+
             celdaInfoComprobante.Add(tablaInfoComprobante);
+            tablaEncabezado.AddCell(celdaInfoComprobante);
+
+            tablaEncabezado.SetBorderBottom(new SolidBorder(0.5f));
+
+            return tablaEncabezado;
+        }
+
+        public Table TablaEncabezado(OrdenDePagoModel ordenDePago, List<byte[]> rutaFont, string baseEmpresa)
+        {
+            if(baseEmpresa.ToUpper() == "GALDEANO_ERP")
+            {
+                _Razon_Social_Empresa = "GALDEANO ALVARADO CHRISTIAN";
+                _Direccion_Empresa = "COSSETTINI,OLGA 152 Piso:8 Dpto:7\r\nCIUDAD AUTONOMA BUENOS AIRES\r\n";
+                _Tipo_Comprobante = "Orden de Pago";
+            }
+
+            Table tablaEncabezado = new Table(new float[] { 3, 1 });
+            tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));
+
+            Table tablaDatosEmpresa = new Table(1);
+            Cell celdaDatosEmpresa = new Cell().SetBorder(Border.NO_BORDER);
+
+            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(_Razon_Social_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.LEFT).SetFontSize(18)
+                .SetFont(PdfFontFactory.CreateFont(rutaFont[0], PdfEncodings.WINANSI)));
+            tablaDatosEmpresa.AddCell(new Cell().Add(new Paragraph(_Direccion_Empresa)).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.LEFT).SetFontSize(10)
+                .SetPaddingTop(-5)
+                .SetFont(PdfFontFactory.CreateFont(rutaFont[1], PdfEncodings.WINANSI)));
+
+            celdaDatosEmpresa.Add(tablaDatosEmpresa);
+            tablaEncabezado.AddCell(celdaDatosEmpresa);
+
+            Table tablaInfoComprobante = new Table(1);
+            Cell celdaInfoComprobante = new Cell().SetBorder(Border.NO_BORDER);
+
+            tablaInfoComprobante.AddCell(new Cell().Add(new Paragraph($"{_Tipo_Comprobante} {ordenDePago.NumeroComprobanteOPA}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.RIGHT).SetFontSize(12));
+            tablaInfoComprobante.AddCell(new Cell().Add(new Paragraph($"Fecha: {DateOnly.FromDateTime(ordenDePago.FechaOPA)}")).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.RIGHT).SetFontSize(10)
+                .SetPaddingTop(20).SetPaddingRight(10)
+                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)));
+
+            celdaInfoComprobante.Add(tablaInfoComprobante);
+            celdaInfoComprobante.Add(new Paragraph("").SetMarginBottom(21));
             tablaEncabezado.AddCell(celdaInfoComprobante);
 
             tablaEncabezado.SetBorderBottom(new SolidBorder(0.5f));

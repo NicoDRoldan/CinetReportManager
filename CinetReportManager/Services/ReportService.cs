@@ -35,6 +35,7 @@ namespace CinetReportManager.Services
 
         private string _numeroComprobante;
         private string _codComprobante;
+        private string _codProveedor;
         private string _rutaReporte;
 
         public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration)
@@ -45,16 +46,17 @@ namespace CinetReportManager.Services
             _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
         }
 
-        public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago)
+        public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null)
         {
             _numeroComprobante = ordenDePago.NumeroComprobanteOPA;
             _codComprobante = ordenDePago.CodigoComprobante;
+            _codProveedor = ordenDePago.CodigoProveedor;
 
             string rutaCarpetaRaiz = @$"{_rutaReporte}";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
 
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
-            string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}";
+            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
+            string rataCarpeta = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}";
 
             if (!Directory.Exists(rataCarpeta)) Directory.CreateDirectory(rataCarpeta);
 
@@ -80,7 +82,7 @@ namespace CinetReportManager.Services
 
                         // Evento para la creación de Encabezado y Pie de página
                         // Se va a crear un encabezado y pie por cada página que se cree.
-                        pdf.AddEventHandler(PdfDocumentEvent.START_PAGE, new EncabezadoHandler(_ordenDePagoService, ordenDePago, doc, rutaImagenLogo, fonts));
+                        pdf.AddEventHandler(PdfDocumentEvent.START_PAGE, new EncabezadoHandler(_ordenDePagoService, ordenDePago, doc, rutaImagenLogo, fonts, baseEmpresa));
 
                         // Sección de Liquidación en Pesos //
                         //Header Liquidación en Pesos
@@ -146,9 +148,9 @@ namespace CinetReportManager.Services
             _numeroComprobante = retencion.RetencionPracticada.NumeroComprobante;
             _codComprobante = retencion.RetencionPracticada.TipoComprobante;
 
-            string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones";
+            string rutaCarpetaRaiz = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{_codComprobante}_{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{_codComprobante}_{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {
@@ -170,9 +172,6 @@ namespace CinetReportManager.Services
                         var fuenteNMLR = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.NimbusMonoLRegular.ttf");
                         var fuenteNMLB = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.NimbusMonoLBold.ttf");
                         List<byte[]> fuentes = new List<byte[]> { fuenteTNRR, fuenteTNRB, fuenteNMLR, fuenteNMLB };
-
-                        ImageData imageData = ImageDataFactory.Create(rutaFirma);
-                        Image firma = new Image(imageData);
 
                         /* Cabecera */
                         string Retencion_Titulo = "";

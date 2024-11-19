@@ -12,7 +12,7 @@ namespace AvisoReporte.Data
 {
     public class DBConnect
     {
-        public static string Base_Odbc { get; set; }
+        public string Base_Odbc { get; set; }
         private static string User_Odbc { get; set; }
         private static string Pass_Odbc { get; set; }
         private static string Tipo_Conexion_Config { get; set; }
