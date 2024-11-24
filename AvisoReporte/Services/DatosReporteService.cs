@@ -30,7 +30,7 @@ namespace AvisoReporte.Services
             {
                 // Obtener datos de comprobantes: CBTEE_CODIGO, EGRE_NUMERO y SUC_CODIGO
                 DataTable datosComprobante = await ObtenerDatosDeComprobante(parametros, esConsulta);
-                if (datosComprobante.Rows.Count == 0) throw new Exception("No se encontraron comprobantes.");
+                if (datosComprobante.Rows.Count == 0) throw new Exception($"Comprobante {cod_Comprobante} - Número {num_Comprobante} - No se encontraron comprobantes.");
 
                 // Obtener datos del proveedor.
                 DataTable datosProveedor = await ObtenerDatosDeProveedor(cod_Proveedor);
@@ -87,7 +87,7 @@ namespace AvisoReporte.Services
                         {
                             CodigoComprobante = row["CTAP_TIPOCBTE1"].ToString().Trim(),
                             NumeroComprobanteFAC = row["CTAP_NUMERO1"].ToString().Trim(),
-                            FechaFactura = Convert.ToDateTime(row["COME_FECHA"]),
+                            FechaFactura = row["CTAP_TIPOCBTE1"].ToString().Trim().ToUpper() == "AN" ? ordenDePago.FechaOPA : Convert.ToDateTime(row["COME_FECHA"]),
                             Saldo = 0,
                             ImportePagado = decimal.TryParse(importeCorregido, out var importe) ? importe : 0
                         });
@@ -174,13 +174,25 @@ namespace AvisoReporte.Services
 
         public async Task<DataTable> ObtenerDatosDeComprobante(List<string> parametros, bool esConsulta = false)
         {
-            // Si esConsulta el falso, además se filtra la obtención del comprobante por fecha, para asegurarse de estar 
-            // buscando el registro correcto. Si no se encuentra el registro, significa que se está trabajando sobre una base de datos diferente.
-            var fecha = DateOnly.FromDateTime(DateTime.Now).ToString("dd/MM/yyyy");
-            var consulta = @$"SET DATEFORMAT DMY 
-                                    SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
-                                    WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ?
-                                    AND CONVERT(DATE, EGRE_FECHA) = '{fecha}' ;";
+            /*
+             * Si es consulta es false, se trabaja sobre la primer consulta. 
+             * En la primer consulta hay un filtro que valida que la diferencia entre el número de egreso pasado
+             * y el número de comprobante de cbte_egresos_n sea menor o igual a 100. Si la diferencia supera ese valor,
+             * no traerá registros y se considerará que se está trabajando sobre la base de datos erronea y se pasará a
+             * trabajar sobre la base de datos secundaría.
+             */
+            var consulta = $@"
+                DECLARE @CbteegCod varchar(100) = ?;
+                DECLARE @EgreNum varchar(100) = ?;
+                DECLARE @SucCod varchar(100) = ?;
+
+                SET DATEFORMAT DMY 
+                SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
+                WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = @CbteegCod AND EGRE_NUMERO = @EgreNum AND CBTEEGSUC_CODIGO = @SucCod 
+                AND ((select CBTEEGN_NUMERO from CBTE_EGRESOS_N where CBTEEG_CODIGO = @CbteegCod) - 
+                    (select CONVERT(INT,EGRE_NUMERO) 
+                        from EGRESOS_E 
+                        where ETAL_CODIGO = '01' and CBTEEG_CODIGO = @CbteegCod and EGRE_NUMERO = @EgreNum and CBTEEGSUC_CODIGO = @SucCod)) <= 100";
 
             // Caso contrario, únicamente busca por las claves primarías.
             if (esConsulta)
@@ -191,9 +203,11 @@ namespace AvisoReporte.Services
 
             var resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros);
 
-            // Si la query no trajo resultados, y no es una consulta. Hace la busqueda en una 
-            // base de datos secundaria.
-            // (a partir de este momento, el programara trabajará con esa base de datos secundaria).
+            /* 
+             * Si la query no trajo resultados, y no es una consulta. Hace la busqueda en una 
+             * base de datos secundaria.
+             * (a partir de este momento, el programara trabajará con esa base de datos secundaria).
+             */
             if ((resultado is null || resultado.Rows.Count == 0) && !esConsulta)
             {
                 _conn.UsaConfig = false;
@@ -212,13 +226,12 @@ namespace AvisoReporte.Services
 
         public async Task<DataTable> ObtenerDatosDeLiquidacion(List<string> parametros, string codProveedor)
         {
-            var parametrosAdd = new List<string>(parametros);
-            parametrosAdd.Add(codProveedor);
-            string consulta = @$"select CTAP_TIPOCBTE1, CTAP_NUMERO1, COME_FECHA, REPLACE(CONVERT(VARCHAR(100), cc.CTAP_IMPORTE),'-', '') AS CTAP_IMPORTE
-                                    from COMPRAS_E c inner join CPRAS_CTACTE cc on c.COME_NUMERO = cc.CTAP_NUMERO1 and c.PRO_CODIGO = cc.PRO_CODIGO 
-                                    WHERE CTAP_TIPOCBTE2= ? and CTAP_NUMERO2 = ? and ctaP_sucursal2 = ? and c.PRO_CODIGO = ?
+            string consulta = @$"select CTAP_TIPOCBTE1, CTAP_NUMERO1, COME_FECHA, REPLACE(CONVERT(VARCHAR(100), cc.CTAP_IMPORTE),'-', '') AS CTAP_IMPORTE 
+                                    from COMPRAS_E c right join CPRAS_CTACTE cc on c.COME_NUMERO = cc.CTAP_NUMERO1 and c.PRO_CODIGO = cc.PRO_CODIGO 
+                                    WHERE CTAP_TIPOCBTE2= ? and CTAP_NUMERO2 = ? and ctaP_sucursal2 = ? 
                                     ORDER BY CTAP_NUMERO1, COME_FECHA;";
-            return await _conn.ObtenerRegistrosAsync(consulta, parametrosAdd) ?? throw new Exception("No se obtuvieron datos de liquidaciones.");
+
+            return await _conn.ObtenerRegistrosAsync(consulta, parametros) ?? throw new Exception("No se obtuvieron datos de liquidaciones.");
         }
 
         public async Task<DataTable> ObtenerDatosDeLiquidacionPlanCodigo(List<string> parametros)
@@ -233,7 +246,7 @@ namespace AvisoReporte.Services
         public async Task<DataTable> ObtenerDatosDeValores(List<string> parametros, bool inge_numero)
         {
             StringBuilder sb = new StringBuilder();
-
+            
             sb.AppendLine($"SELECT v.VALM_FECHAVTO, v.VAL_CODIGO, vt.VAL_DESCRIPCION, valm_numero, VALM_IMPORTE FROM VAL_MOVIMIENTOS v ");
             sb.AppendLine($"INNER JOIN VALORES_TIPOS vt on vt.VAL_CODIGO = v.VAL_CODIGO ");
 
