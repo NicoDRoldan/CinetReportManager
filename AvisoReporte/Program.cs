@@ -12,6 +12,8 @@ var host = Host.CreateDefaultBuilder(args)
     {
         services.AddScoped<AvisoReporteApp>();
         services.AddScoped<DBConnect>();
+        services.AddScoped<IAccesoDatosService, AccesoDatosService>();
+        services.AddScoped<IMapeoDatosService, MapeoDatosService>();
         services.AddScoped<IDatosReporteService, DatosReporteService>();
         services.AddScoped<IDatosReportesRetencionesServices, DatosReportesRetencionesService>();
         services.AddScoped<IEnvioService, EnvioService>();

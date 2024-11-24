@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AvisoReporte.Models
+namespace AvisoReporte.Models.Comprobante
 {
     public class ClavesComprobantesModel
     {

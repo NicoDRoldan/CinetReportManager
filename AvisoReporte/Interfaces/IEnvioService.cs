@@ -1,4 +1,4 @@
-﻿using AvisoReporte.Models;
+﻿using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using System;
 using System.Collections.Generic;

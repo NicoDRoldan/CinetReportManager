@@ -1,6 +1,7 @@
 ﻿using AvisoReporte.Data;
 using AvisoReporte.Interfaces;
-using AvisoReporte.Models;
+using AvisoReporte.Models.Comprobante;
+using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using AvisoReporte.Services;
 using Newtonsoft.Json;
