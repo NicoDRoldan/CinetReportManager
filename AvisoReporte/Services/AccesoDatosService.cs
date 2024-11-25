@@ -110,7 +110,7 @@ namespace AvisoReporte.Services
 
         /* Retenciones */
 
-        public async Task<DataTable> ObtenerNumerosDeRetenciones(List<string> parametros, string? retencionFiltro = null)
+        public async Task<DataTable> ObtenerRetenciones(List<string> parametros, string? retencionFiltro = null)
         {
             var parametrosAdd = new List<string>(parametros);
             try

@@ -23,6 +23,17 @@ namespace AvisoReporte.Interfaces
             bool esConsulta = false
             );
 
-        Task<List<RetencionModel>> ObtenerRetencion(OrdenDePagoModel ordenDePago, string? retencionFiltro = null);
+        Task<RetencionModel> MapeoRetenciones(
+            string cod_concepto, 
+            string num_retencion,
+            DataTable datosRetencion,
+            string importeImponible,
+            string importeRetenido,
+            string importeOrigina,
+            DataTable datosProveedor,
+            OrdenDePagoModel ordenDePago, 
+            string baseEmpresa,
+            string? retencionFiltro = null
+            );
     }
 }

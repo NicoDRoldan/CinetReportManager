@@ -12,7 +12,13 @@ namespace AvisoReporte.Services
 {
     public class MapeoDatosService : IMapeoDatosService
     {
-        public async Task<OrdenDePagoModel> MapeoOrdenDePago(DataTable datosComprobante, DataTable datosProveedor, DataTable datosLiquidacion, DataTable? datosLiquidacionPlanCodigo, DataTable datosValoresIng, DataTable datosValoresEgr, ClavesComprobantesModel claves, bool enviaEmail = true, bool esConsulta = false)
+        private string _Denominacion;
+        private string _DireccionAgente;
+        private string _IvaAgente;
+        private string _CuitAgente;
+
+        public async Task<OrdenDePagoModel> MapeoOrdenDePago(DataTable datosComprobante, DataTable datosProveedor, DataTable datosLiquidacion, DataTable? datosLiquidacionPlanCodigo, DataTable datosValoresIng, 
+            DataTable datosValoresEgr, ClavesComprobantesModel claves, bool enviaEmail = true, bool esConsulta = false)
         {
             try
             {
@@ -127,17 +133,104 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task<List<RetencionModel>> ObtenerRetencion(OrdenDePagoModel ordenDePago, string? retencionFiltro = null)
+        public async Task<RetencionModel> MapeoRetenciones(string cod_concepto, string num_retencion, DataTable datosRetencion, string importeImponible, string importeRetenido, string importeOrigina, DataTable datosProveedor,
+            OrdenDePagoModel ordenDePago, string baseEmpresa, string? retencionFiltro = null)
         {
-            List<RetencionModel> retenciones = new List<RetencionModel>();
-
             try
             {
-                return retenciones;
+                /* Agregar los datos obtenidos a los modelos correspondientes */
+                string cod_retencion = datosRetencion.Rows[0]["RETEN_CODIGO"].ToString().Trim();
+
+                // Calcular importes
+                decimal importeImponibleDecimal = Convert.ToDecimal(importeImponible);
+                decimal importeRetenidoDecimal = Convert.ToDecimal(importeRetenido);
+                decimal importeOriginaDecimal = Convert.ToDecimal(importeOrigina);
+                string porcentajeCalculadoString = ((importeRetenidoDecimal / importeImponibleDecimal) * 100).ToString("0.00");
+                decimal porcentajeCalculado = Convert.ToDecimal(porcentajeCalculadoString);
+
+                await ValidarDatosAgentesDeRetencion(baseEmpresa);
+
+                RetencionModel retencionModel = new RetencionModel
+                {
+                    NumeroRetencion = num_retencion,
+                    CodigoRetencion = cod_retencion,
+                    Fecha = ordenDePago.FechaOPA,
+                    IB = "901-039363-6", // Dato hardcodeado
+                    AgenteRetencion = new AgenteRetencionModel()
+                    {
+                        Denominacion = _Denominacion,
+                        DireccionAgente = _DireccionAgente,
+                        IvaAgente = _IvaAgente,
+                        CuitAgente = _CuitAgente
+                    },
+                    SujetoRetenido = new SujetoRetenidoModel()
+                    {
+                        RazonSocialSujeto = datosProveedor.Rows[0]["PRO_LGLNOMBRE"].ToString(),
+                        CuitSujeto = datosProveedor.Rows[0]["PRO_LGLCUIT"].ToString(),
+                        DireccionRetenido = @$"{datosProveedor.Rows[0]["PRO_LGLDIRECCION"].ToString().Trim()} {datosProveedor.Rows[0]["PRO_LGLLOCALIDAD"].ToString().Trim()} {datosProveedor.Rows[0]["PROVIN_CODIGO"].ToString().Trim()}",
+                        CodigoProveedor = datosProveedor.Rows[0]["PRO_CODIGO"].ToString(),
+                    },
+                    RetencionPracticada = new RetencionPracticadaModel()
+                    {
+                        TipoImpuesto = ValidarTipoImpuesto(cod_retencion),
+                        TipoComprobante = ordenDePago.CodigoComprobante,
+                        NumeroComprobante = ordenDePago.NumeroComprobanteOPA,
+                        DescripcionReten = datosRetencion.Rows[0]["RETEN_DESCCONCEPTO"].ToString().Trim(),
+                        ImporteOriginaReten = importeOriginaDecimal
+                    },
+                    BaseImponible = importeImponibleDecimal,
+                    Porcentaje = porcentajeCalculado,
+                    ImporteRetencion = importeRetenidoDecimal,
+                    Firma = "MOSTAZA Y PAN S.A. APODERADO" // Dato hardcodeado
+                };
+
+                return retencionModel;
             }
             catch(Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public string ValidarTipoImpuesto(string cod_retencion)
+        {
+            string tipo_impuesto = "";
+            switch (cod_retencion)
+            {
+                case "IIBB":
+                    tipo_impuesto = "Ingresos Brutos de la Prov. de Bs. As.";
+                    break;
+                case "IIBBCABA":
+                    tipo_impuesto = "Ingresos Brutos Capital Federal";
+                    break;
+                case "IBMENDOZA":
+                    tipo_impuesto = "Ingresos Brutos Mendoza";
+                    break;
+                case "IVAM":
+                    tipo_impuesto = "Impuesto al Valor Agregado";
+                    break;
+                case "RG830":
+                    tipo_impuesto = "Impuesto a las Ganancias";
+                    break;
+            }
+            return tipo_impuesto;
+        }
+
+        public async Task ValidarDatosAgentesDeRetencion(string? baseEmpresa = null)
+        {
+            if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GALDEANO_ERP")
+            {
+                _Denominacion = "GALDEANO ALVARADO CHRISTIAN DANIEL"; // Dato hardcodeado
+                _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
+                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                _CuitAgente = "20-23426454-1"; // Dato hardcodeado
+            }
+            else
+            {
+                _Denominacion = "Mostaza y Pan S.A"; // Dato hardcodeado
+                _DireccionAgente = "Au. Bs.As. - La Plata Km.9 Local 1003, Avellaneda - Pcía de Buenos Aires."; // Dato hardcodeado
+                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                _CuitAgente = "33-70701313-9"; // Dato hardcodeado
             }
         }
     }

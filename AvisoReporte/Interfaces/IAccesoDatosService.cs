@@ -17,7 +17,7 @@ namespace AvisoReporte.Interfaces
         Task<DataTable> ObtenerDatosDeValores(List<string> parametros, bool inge_numero);
 
         /* Retenciones */
-        Task<DataTable> ObtenerNumerosDeRetenciones(List<string> parametros, string? retencionFiltro = null);
+        Task<DataTable> ObtenerRetenciones(List<string> parametros, string? retencionFiltro = null);
         Task<DataTable> ObtenerDatosRetencion(string cod_concepto);
         Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte);
         Task<string> ObtenerImporteOrigina(List<string> parametros);
