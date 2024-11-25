@@ -38,7 +38,7 @@ namespace AvisoReporte.Services
                 SET DATEFORMAT DMY 
                 SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
                 WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = @CbteegCod AND EGRE_NUMERO = @EgreNum AND CBTEEGSUC_CODIGO = @SucCod 
-                AND ((select CBTEEGN_NUMERO from CBTE_EGRESOS_N where CBTEEG_CODIGO = @CbteegCod) - 
+                AND ((select CBTEEGN_NUMERO from CBTE_EGRESOS_N where CBTEEG_CODIGO = @CbteegCod AND CBTEEGSUC_CODIGO = @SucCod) - 
                     (select CONVERT(INT,EGRE_NUMERO) 
                         from EGRESOS_E 
                         where ETAL_CODIGO = '01' and CBTEEG_CODIGO = @CbteegCod and EGRE_NUMERO = @EgreNum and CBTEEGSUC_CODIGO = @SucCod)) <= 100";
