@@ -11,33 +11,22 @@ namespace CinetReportManager.Services
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
+        private readonly EmailModel _emailModel;
 
-        public EmailService (IConfiguration configuration)
+        public EmailService (IConfiguration configuration, EmailModel emailModel)
         {
             _configuration = configuration;
+            _emailModel = emailModel;
         }
-
-        private string Email_Desde { get; set; }
-        private string Clave_Email { get; set; }
-        private string Servicio_Email { get; set; }
-        private int PuertoEmail { get; set; }
-        private bool EnableSsl { get; set; }
-        private string? ReceiveTest { get; set; }
 
         public async Task EnviarEmailAProveedor(List<string> emailsProveedores, string nroComprobanteOpa, Dictionary<string, Stream> streamsDictionary)
         {
-            // Obtener datos del archivo de configuración
-            Email_Desde = _configuration.GetValue<string>("EmailConfig:Email")!;
-            Clave_Email = _configuration.GetValue<string>("EmailConfig:PassEmail")!;
-            Servicio_Email = _configuration.GetValue<string>("EmailConfig:ServerEmail")!;
-            PuertoEmail = _configuration.GetValue<int>("EmailConfig:PuetoEmail")!;
-            EnableSsl = _configuration.GetValue<bool>("EmailConfig:EnableSsl")!;
-            ReceiveTest = _configuration.GetValue<string>("EmailConfig:ReceiveTest")!;
+            _emailModel.ObtenerConfiguracion();
 
-            if (!string.IsNullOrEmpty(ReceiveTest))
+            if (!string.IsNullOrEmpty(_emailModel.ReceiveTest))
             {
                 emailsProveedores.Clear();
-                emailsProveedores.Add(ReceiveTest);
+                emailsProveedores.Add(_emailModel.ReceiveTest);
             }
 
             if (!ValidarEmails(emailsProveedores)) throw new Exception("Se generó el reporte pero no hay emails para hacer el envío.");
@@ -45,18 +34,13 @@ namespace CinetReportManager.Services
             try
             {
                 /* Configuración del cliente para el envío */
-                SmtpClient smtpClient = new SmtpClient(Servicio_Email);
-
-                smtpClient.UseDefaultCredentials = false;
-                smtpClient.Port = PuertoEmail;
-                smtpClient.Credentials = new NetworkCredential(Email_Desde, Clave_Email);
-                smtpClient.EnableSsl = EnableSsl;
+                SmtpClient smtpClient = ConfigurarSmtp();
 
                 // Se instancia el objeto MailMessage
                 var message = new MailMessage();
 
                 // Email que envía
-                message.From = new MailAddress(Email_Desde);
+                message.From = new MailAddress(_emailModel.Email_Desde);
 
                 // Destinatarios
                 foreach (var email in emailsProveedores)
@@ -103,11 +87,27 @@ namespace CinetReportManager.Services
                 }
 
                 await smtpClient.SendMailAsync(message);
+
+                Console.WriteLine("Se realizó el envío del email.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error al enviar el email: {ex.Message}");
                 throw new Exception($"Error al enviar el email: {ex.Message}");
             }
+        }
+
+        public SmtpClient ConfigurarSmtp()
+        {
+            /* Configuración del cliente para el envío */
+            SmtpClient smtpClient = new SmtpClient(_emailModel.Servicio_Email);
+
+            smtpClient.UseDefaultCredentials = false;
+            smtpClient.Port = _emailModel.PuertoEmail;
+            smtpClient.Credentials = new NetworkCredential(_emailModel.Email_Desde, _emailModel.Clave_Email);
+            smtpClient.EnableSsl = _emailModel.EnableSsl;
+
+            return smtpClient;
         }
 
         public bool ValidarEmails(List<string> Emails)

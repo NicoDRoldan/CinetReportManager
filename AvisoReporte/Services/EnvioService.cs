@@ -24,7 +24,7 @@ namespace AvisoReporte.Services
             {
                 HttpClient client = new HttpClient();
                 StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync($"htpp://{host}:{port}/api/{controller}/{endpoint}", content);
+                HttpResponseMessage response = await client.PostAsync($"http://{host}:{port}/api/{controller}/{endpoint}", content);
                 Log.Information($"Json enviado:\n {json}");
                 return response;
             }

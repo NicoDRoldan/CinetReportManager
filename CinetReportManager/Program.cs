@@ -1,4 +1,5 @@
 using CinetReportManager.Interfaces;
+using CinetReportManager.Models;
 using CinetReportManager.Services;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
@@ -33,6 +34,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<EmailModel>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddTransient<IOrdenDePagoService, OrdenDePagoService>();
 builder.Services.AddTransient<IRetencionService, RetencionService>();
