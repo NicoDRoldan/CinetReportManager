@@ -1,4 +1,4 @@
-﻿using AvisoReporte.Models;
+﻿using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ namespace AvisoReporte.Interfaces
 {
     public interface IEnvioService
     {
+        Task<HttpResponseMessage> PostAsyncRequest(string json, string host, string port, string controller, string endpoint);
         Task<string> LlamadoApiCinetReportManager(LlamadoDto llamadoDto);
         Task<string> LlamadoApiCinetReportManager(List<RetencionModel> retenciones);
     }

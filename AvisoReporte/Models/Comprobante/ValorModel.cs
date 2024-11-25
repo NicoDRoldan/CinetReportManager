@@ -1,4 +1,4 @@
-﻿namespace AvisoReporte.Models
+﻿namespace AvisoReporte.Models.Comprobante
 {
     public class ValorModel
     {

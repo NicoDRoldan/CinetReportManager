@@ -1,4 +1,4 @@
-﻿using AvisoReporte.Models;
+﻿using AvisoReporte.Models.Comprobante;
 using System;
 using System.Collections.Generic;
 using System.Linq;

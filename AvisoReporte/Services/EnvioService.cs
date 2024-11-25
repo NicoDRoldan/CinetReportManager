@@ -1,5 +1,4 @@
 ﻿using AvisoReporte.Interfaces;
-using AvisoReporte.Models;
 using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using Newtonsoft.Json;
@@ -19,17 +18,29 @@ namespace AvisoReporte.Services
         private readonly string _HostApi = string.IsNullOrEmpty(ConfigurationManager.AppSettings["HostReportManager"]) ? "localhost" : ConfigurationManager.AppSettings["HostReportManager"];
         private readonly string _PortApi = string.IsNullOrEmpty(ConfigurationManager.AppSettings["PuertoReportManager"]) ? "7253" : ConfigurationManager.AppSettings["PuertoReportManager"];
 
+        public async Task<HttpResponseMessage> PostAsyncRequest(string json, string host, string port, string controller, string endpoint)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PostAsync($"http://{host}:{port}/api/{controller}/{endpoint}", content);
+                Log.Information($"Json enviado:\n {json}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<string> LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
         {
             try
             {
-                HttpClient cliente = new HttpClient();
-
                 string json = JsonConvert.SerializeObject(llamadoDto);
-                StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://{_HostApi}:{_PortApi}/api/ReportManager/GenerarReporte", contenido);
 
-                Log.Information($"Json enviado:\n {json}");
+                HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarReporte");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
@@ -53,13 +64,9 @@ namespace AvisoReporte.Services
         {
             try
             {
-                HttpClient cliente = new HttpClient();
-
                 string json = JsonConvert.SerializeObject(retenciones);
-                StringContent contenido = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage respuestaMsg = await cliente.PostAsync($"http://{_HostApi}:{_PortApi}/api/ReportManager/GenerarRetencion", contenido);
 
-                Log.Information($"Json enviado:\n {json}");
+                HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarRetencion");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
