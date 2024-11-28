@@ -162,9 +162,9 @@ namespace AvisoReporte.Services
             parametrosAdd.Add(cod_concepto);
             try
             {
-                string consulta = @$"SELECT EGRC_IMPORTE AS [BASE_IMPONIBLE] FROM EGRESOS_C
+                string consulta = @$"SELECT TOP 1 EGRC_IMPORTE AS [BASE_IMPONIBLE] FROM EGRESOS_C
                                     WHERE CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? AND EGRC_NUMRET = ? AND EGRC_CONCEPTO = ? 
-                                    AND EGRC_TIPO like '%{tipoDeImporte}'";
+                                    AND EGRC_TIPO like '%{tipoDeImporte}' AND EGRC_IMPORTE != '0.00' ORDER BY EGRC_IMPORTE DESC";
                 string resultado = await _conn.ObtenerRegistroAsync(consulta, parametrosAdd);
                 return resultado;
             }
