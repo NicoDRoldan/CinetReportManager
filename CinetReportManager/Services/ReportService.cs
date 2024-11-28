@@ -151,7 +151,7 @@ namespace CinetReportManager.Services
 
             string rutaCarpetaRaiz = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{_codComprobante}_{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.CodigoConcepto}_{_codComprobante}_{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {
@@ -195,6 +195,11 @@ namespace CinetReportManager.Services
                             case "IBMENDOZA":
                                 Retencion_Titulo = "RETENCIONES DE INGRESOS BRUTOS MENDOZA";
                                 Nombre_Impuesto = "Ingresos Brutos Mendoza";
+                                reportePrincipal = true;
+                                break;
+                            case "IIBBSFE":
+                                Retencion_Titulo = "RETENCIONES DE INGRESOS BRUTOS SANTA FE";
+                                Nombre_Impuesto = "Ingresos Brutos Santa Fe";
                                 reportePrincipal = true;
                                 break;
                             case "IVAM":

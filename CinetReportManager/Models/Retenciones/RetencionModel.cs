@@ -4,6 +4,7 @@
     {
         public string NumeroRetencion { get; set; }
         public string CodigoRetencion { get; set; }
+        public string CodigoConcepto { get; set; } // EGRC_CONCEPTO
         public DateTime Fecha { get; set; }
         public string IB { get; set; }
         public virtual AgenteRetencionModel AgenteRetencion { get; set; }

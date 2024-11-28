@@ -52,8 +52,8 @@ namespace AvisoReporte.Services
                     DataTable datosRetencion = await _accesoDatosService.ObtenerDatosRetencion(cod_concepto);
                     DataTable datosProveedor = await _accesoDatosService.ObtenerDatosProveedor(ordenDePago.CodigoProveedor);
 
-                    string importeImponible = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "P");
-                    string importeRetenido = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "R");
+                    string importeImponible = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "P", cod_concepto);
+                    string importeRetenido = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "R", cod_concepto);
                     string importeOrigina = await _accesoDatosService.ObtenerImporteOrigina(parametros);
 
                     RetencionModel ret = await _mapeoDatosService.MapeoRetenciones(cod_concepto, num_retencion, 

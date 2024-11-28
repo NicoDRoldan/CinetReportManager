@@ -155,14 +155,15 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte)
+        public async Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte, string cod_concepto)
         {
             var parametrosAdd = new List<string>(parametros);
             parametrosAdd.Add(num_retencion);
+            parametrosAdd.Add(cod_concepto);
             try
             {
                 string consulta = @$"SELECT EGRC_IMPORTE AS [BASE_IMPONIBLE] FROM EGRESOS_C
-                                    WHERE CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? AND EGRC_NUMRET = ? 
+                                    WHERE CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? AND EGRC_NUMRET = ? AND EGRC_CONCEPTO = ? 
                                     AND EGRC_TIPO like '%{tipoDeImporte}'";
                 string resultado = await _conn.ObtenerRegistroAsync(consulta, parametrosAdd);
                 return resultado;

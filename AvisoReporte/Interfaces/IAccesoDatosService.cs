@@ -19,7 +19,7 @@ namespace AvisoReporte.Interfaces
         /* Retenciones */
         Task<DataTable> ObtenerRetenciones(List<string> parametros, string? retencionFiltro = null);
         Task<DataTable> ObtenerDatosRetencion(string cod_concepto);
-        Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte);
+        Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte, string cod_concepto);
         Task<string> ObtenerImporteOrigina(List<string> parametros);
         Task<DataTable> ObtenerDatosProveedor(string cod_proveedor);
     }

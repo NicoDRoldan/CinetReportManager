@@ -154,6 +154,7 @@ namespace AvisoReporte.Services
                 {
                     NumeroRetencion = num_retencion,
                     CodigoRetencion = cod_retencion,
+                    CodigoConcepto = cod_concepto,
                     Fecha = ordenDePago.FechaOPA,
                     IB = "901-039363-6", // Dato hardcodeado
                     AgenteRetencion = new AgenteRetencionModel()
@@ -205,6 +206,9 @@ namespace AvisoReporte.Services
                     break;
                 case "IBMENDOZA":
                     tipo_impuesto = "Ingresos Brutos Mendoza";
+                    break;
+                case "IIBBSFE":
+                    tipo_impuesto = "Ingresos Brutos Santa Fe";
                     break;
                 case "IVAM":
                     tipo_impuesto = "Impuesto al Valor Agregado";

@@ -71,7 +71,7 @@ namespace CinetReportManager.Controllers
                 }
                 try
                 {
-                    await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);
+                    //await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);
                     sb.AppendLine("El envío del email fue correcto.");
                 }
                 catch (Exception ex)
