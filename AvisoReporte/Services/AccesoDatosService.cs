@@ -117,7 +117,7 @@ namespace AvisoReporte.Services
             {
                 string consulta = @$"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO FROM EGRESOS_C
                                     WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
-                                    AND EGRC_NUMRET != '0'";
+                                    AND EGRC_NUMRET != '0' AND EGRC_CONCEPTO != '' ";
 
                 if (!string.IsNullOrEmpty(retencionFiltro))
                 {
