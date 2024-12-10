@@ -57,36 +57,6 @@ namespace AvisoReporte.Services
             {
                 throw new Exception($"Error al obtener datos: {ex.Message}");
             }
-        }
-        
-        public async Task<ClavesComprobantesModel> ObtenerClavesDeComprobante(string claves)
-        {
-            int index = -1;
-            for (int i = 0; i < claves.Length; i++)
-            {
-                if (char.IsLetter(claves[i]))
-                {
-                    index = i;
-                    break;
-                }
-            }
-            int indexTotal = -1;
-            for (int i = index; i < claves.Length; i++)
-            {
-                if (!char.IsLetter(claves[i]))
-                {
-                    indexTotal = i;
-                    break;
-                }
-            }
-            ClavesComprobantesModel clavesComprobantes = new ClavesComprobantesModel()
-            {
-                Cod_Comprobante = claves.Substring(index, indexTotal - index),
-                Num_Comprobante = claves.Substring(indexTotal + 4),
-                Cod_Sucursal = claves.Substring(indexTotal, 4),
-                Cod_Proveedor = claves.Substring(0, index)
-            };
-            return clavesComprobantes;
-        }        
+        }      
     }
 }

@@ -34,14 +34,21 @@ Log.Logger = new LoggerConfiguration()
 
 var app = host.Services.GetRequiredService<AvisoReporteApp>();
 
-if (args.Length > 0)
+if (args.Length == 1) /* Generación de reportes común */
 {
     //Formado esperado: 009840OPA999900000001
     await app.AvisoReporte(args[0]);
 }
-else if(args.Length == 0)
+/* Si la cantidad de parámetros es mayor a 1 se procede de otra forma */
+else if (args.Length > 1 && args[1].ToUpper().Contains("RET")) /* Llamado a reimpresión de retenciones */
 {
-    await app.SolicitudRegenerarReporte();
+    //Formado esperado: 009840OPA999900000001 | RET+NOMBRERETENCION (o RET+* para todas las retenciones) 
+    await app.ReimpresionRetenciones(args[0], args[1]);
+}
+else if (args.Length > 1) /* Llamado a reimpresión de comprobantes */
+{
+    //Formado esperado: 009840OPA999900000001 | True o False para envío de email
+    await app.ReimpresionReporte(args[0], args[1]);
 }
 else
 {

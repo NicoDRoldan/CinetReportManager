@@ -42,15 +42,7 @@ namespace AvisoReporte.Data
                     throw new Exception("No se estableció la conexión.");
             }
 
-            // Si la propiedad UsaConfig es true, Empresa_Config toma el valor de Empresa, caso contrario toma el valor de Empresa_Sec
-            if (UsaConfig)
-            {
-                Empresa_Config = ConfigurationManager.AppSettings["Empresa"] is null ? "2" : ConfigurationManager.AppSettings["Empresa"];
-            }
-            else
-            {
-                Empresa_Config = ConfigurationManager.AppSettings["Empresa_Sec"] is null ? "2" : ConfigurationManager.AppSettings["Empresa_Sec"];
-            }
+            Empresa_Config = ConfigurationManager.AppSettings["Empresa"] is null ? "2" : ConfigurationManager.AppSettings["Empresa"];
 
             switch (Empresa_Config)
             {

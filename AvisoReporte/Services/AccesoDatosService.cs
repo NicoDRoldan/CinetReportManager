@@ -23,45 +23,10 @@ namespace AvisoReporte.Services
 
         public async Task<DataTable> ObtenerDatosDeComprobante(List<string> parametros, bool esConsulta = false)
         {
-            /*
-             * Si es consulta es false, se trabaja sobre la primer consulta. 
-             * En la primer consulta hay un filtro que valida que la diferencia entre el número de egreso pasado
-             * y el número de comprobante de cbte_egresos_n sea menor o igual a 100. Si la diferencia supera ese valor,
-             * no traerá registros y se considerará que se está trabajando sobre la base de datos erronea y se pasará a
-             * trabajar sobre la base de datos secundaría.
-             */
-            var consulta = $@"
-                DECLARE @CbteegCod varchar(100) = ?;
-                DECLARE @EgreNum varchar(100) = ?;
-                DECLARE @SucCod varchar(100) = ?;
-
-                SET DATEFORMAT DMY 
-                SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
-                WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = @CbteegCod AND EGRE_NUMERO = @EgreNum AND CBTEEGSUC_CODIGO = @SucCod 
-                AND ((select CBTEEGN_NUMERO from CBTE_EGRESOS_N where CBTEEG_CODIGO = @CbteegCod AND CBTEEGSUC_CODIGO = @SucCod) - 
-                    (select CONVERT(INT,EGRE_NUMERO) 
-                        from EGRESOS_E 
-                        where ETAL_CODIGO = '01' and CBTEEG_CODIGO = @CbteegCod and EGRE_NUMERO = @EgreNum and CBTEEGSUC_CODIGO = @SucCod)) <= 100";
-
-            // Caso contrario, únicamente busca por las claves primarías.
-            if (esConsulta)
-            {
-                consulta = @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
+            var consulta = @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
                                     WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? ;";
-            }
 
             var resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros);
-
-            /* 
-             * Si la query no trajo resultados, y no es una consulta. Hace la busqueda en una 
-             * base de datos secundaria.
-             * (a partir de este momento, el programara trabajará con esa base de datos secundaria).
-             */
-            if ((resultado is null || resultado.Rows.Count == 0) && !esConsulta)
-            {
-                _conn.UsaConfig = false;
-                resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros) ?? throw new Exception("No se obtuvieron datos de comprobantes.");
-            }
 
             return resultado;
         }

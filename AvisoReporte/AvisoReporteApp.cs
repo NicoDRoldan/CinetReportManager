@@ -45,13 +45,15 @@ namespace AvisoReporte
                  * SUC_CODIGO.
                  * EGRE_NUMERO
                  */
-                ClavesComprobantesModel clavesComprobantes = await _datosReporteService.ObtenerClavesDeComprobante(claves);
+
+                /* Se mapean las claves */
+                await ComprobanteDto.ObtenerClavesDeComprobante(claves);
 
                 /* Obtener registros desde la base de datos: */
 
                 // Obtener los datos de la Orden de pago
                 OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago(clavesComprobantes.Cod_Comprobante, clavesComprobantes.Num_Comprobante, clavesComprobantes.Cod_Sucursal, clavesComprobantes.Cod_Proveedor, enviaEmail);
+                    .ObtenerOrdenDePago(ComprobanteDto.Cod_Comprobante, ComprobanteDto.Nro_Comprobante, ComprobanteDto.Nro_Sucursal, ComprobanteDto.Cod_Proveedor, enviaEmail);
 
                 // Si la orden de pago es null, se lanza excepción
                 if (opa is null) throw new Exception("No se encontró una orden de pago");
@@ -64,7 +66,7 @@ namespace AvisoReporte
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"Mensaje - {clavesComprobantes.Cod_Proveedor} - {clavesComprobantes.Num_Comprobante} - {ex.Message}");
+                    Log.Error($"Mensaje - {ComprobanteDto.Cod_Proveedor} - {ComprobanteDto.Nro_Comprobante} - {ex.Message}");
                 }
 
                 // Se guardan los datos en llamadoDto, que es el modelo que se enviará a CinetReportManager
@@ -160,7 +162,7 @@ namespace AvisoReporte
             }
         }
 
-        public async Task AvisoRetencion(string num_comprobante, string cod_proveedor ,string? cod_retencion = null)
+        public async Task AvisoRetencion(string cod_comprobante, string num_comprobante, string num_sucursal, string cod_proveedor ,string? cod_retencion = null)
         {
             try
             {
@@ -182,167 +184,37 @@ namespace AvisoReporte
             }
         }
 
-        public async Task SolicitudRegenerarReporte()
+        public async Task ReimpresionReporte(string claves, string envioEmailString)
         {
-            string opcion;
+            /* Se transforma el string de envioEmail a bool */
+            bool envioEmail = envioEmailString.ToUpper().Contains("T") ? true : false;
 
-            while (true)
+            try
             {
-                Console.Clear();
-
-                Console.WriteLine("REGENERAR REPORTE:\n");
-                Console.WriteLine("Seleccionar opción:");
-                Console.WriteLine("1) Regenerar Orden de Pago y Retenciones (Con envío de email).");
-                Console.WriteLine("2) Regenerar Orden de Pago y Retenciones (Sin envío de email).");
-                Console.WriteLine("3) Regenerar Orden de Pago.");
-                Console.WriteLine("4) Regenerar Retención.");
-                Console.WriteLine("5) Salir.");
-
-                opcion = Console.ReadLine()!;
-                bool opcionValida = false;
-
-                while (Convert.ToInt32(opcion) < 1 || Convert.ToInt32(opcion) > 5)
-                {
-                    Console.WriteLine("Elegir una opción válida");
-                    opcion = Console.ReadLine()!;
-                }
-
-                if(opcion == "5")
-                {
-                    break;
-                }
-
-                try
-                {
-                    await ReporteARegenerar(opcion);
-
-                    Console.WriteLine("Se regeneró el reporte.");
-                    Console.ReadKey();
-
-                    Console.Clear();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error al regenerar el reporte.");
-                    Console.ReadKey();
-
-                    Log.Error($"Error: {ex.Message}");
-                }
+                /* Se llama al método para generar el reporte */
+                await AvisoReporte(claves, envioEmail);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 
-        public async Task ReporteARegenerar(string opcion)
+        public async Task ReimpresionRetenciones(string claves, string codRetencion)
         {
-            string nro_comprobante = "";
-            string cod_proveedor = "";
-            string cod_reten = "";
-
-            while (string.IsNullOrEmpty(nro_comprobante) || string.IsNullOrEmpty(cod_proveedor))
+            codRetencion = codRetencion.Contains("*") ? null! : codRetencion.Replace("RET", ""); /* Si codRetención es *, se considerará null. */
+            
+            try
             {
-                Console.WriteLine("Indicar el número de orden de pago: ");
-                nro_comprobante = Console.ReadLine()!;
-                Console.WriteLine("Indicar el código de proveedor: ");
-                cod_proveedor = Console.ReadLine()!;
+                /* Se mapean las claves */
+                await ComprobanteDto.ObtenerClavesDeComprobante(claves);
+                /* Se hace el llamado para regenerar las retenciones */
+                await AvisoRetencion(ComprobanteDto.Cod_Comprobante, ComprobanteDto.Nro_Comprobante, ComprobanteDto.Nro_Sucursal, ComprobanteDto.Cod_Proveedor, codRetencion);
             }
-
-            if(opcion == "4")
+            catch (Exception ex)
             {
-                bool valido = false;
-                string opcionRet = "";
-
-                Console.WriteLine("Elegir el código de retención: ");
-                Console.WriteLine("1) IIBB");
-                Console.WriteLine("2) IIBBCABA");
-                Console.WriteLine("3) IBMENDOZA");
-                Console.WriteLine("4) RG830");
-                Console.WriteLine("5) IVAM");
-                Console.WriteLine("6) Regenrar todas las retenciones asociadas");
-
-                opcionRet = Console.ReadLine();
-
-                while (!valido)
-                {
-                    switch (opcionRet)
-                    {
-                        case "1":
-                            cod_reten = "IIBB";
-                            valido = true;
-                            break;
-                        case "2":
-                            cod_reten = "IIBBCABA";
-                            valido = true;
-                            break;
-                        case "3":
-                            cod_reten = "IBMENDOZA";
-                            valido = true;
-                            break;
-                        case "4":
-                            cod_reten = "RG830";
-                            valido = true;
-                            break;
-                        case "5":
-                            cod_reten = "IVAM";
-                            valido = true;
-                            break;
-                        case "6":
-                            cod_reten = null;
-                            valido = true;
-                            break;
-                        default:
-                            Console.WriteLine("Seleccionar una opción válida.");
-                            opcionRet = Console.ReadLine();
-                            break;
-                    }
-                }
-            }
-            bool reintento = true;
-            while (reintento)
-            {
-                try
-                {
-                    switch (opcion)
-                    {
-                        case "1":
-                            Console.WriteLine("Se generarán nuevamente los reportes de Orden de Pago y Retenciones.");
-                            reintento = false;
-                            await AvisoRegenerarReporte(nro_comprobante, cod_proveedor, true);
-                            break;
-                        case "2":
-                            Console.WriteLine("Se generarán nuevamente los reportes de Orden de Pago y Retenciones.");
-                            reintento = false;
-                            await AvisoRegenerarReporte(nro_comprobante, cod_proveedor, false);
-                            break;
-                        case "3":
-                            Console.WriteLine("Se generarán nuevamente el reporte de Orden de Pago.");
-                            reintento = false;
-                            await AvisoOrdenDePago(nro_comprobante, cod_proveedor, false);
-                            break;
-                        case "4":
-                            Console.WriteLine("Se generará nuevamente el/los reporte/s de Retenciones.");
-                            reintento = false;
-                            await AvisoRetencion(nro_comprobante, cod_proveedor, cod_reten);
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (ex.ToString().ToLower().Contains("no existe"))
-                    {
-                        Console.WriteLine($"{ex.Message}");
-                        Console.ReadKey();
-                        throw new Exception();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Ocurrió un error.");
-                        Console.WriteLine($"¿Volver a intentar? (S/N)");
-                        var respuesta = Console.ReadLine().Trim().ToUpper();
-                        if (respuesta == "S") reintento = true;
-                        else throw new Exception();
-                    }
-                }
+                throw new Exception(ex.Message);
             }
         }
-
     }
 }
