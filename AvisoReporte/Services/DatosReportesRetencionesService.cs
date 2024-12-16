@@ -46,15 +46,19 @@ namespace AvisoReporte.Services
 
                 foreach (DataRow retencion in retenciones.Rows)
                 {
+                    string egrc_tipo = retencion["EGRC_TIPO"].ToString();
                     string cod_concepto = retencion["EGRC_CONCEPTO"].ToString();
                     string num_retencion = retencion["EGRC_NUMRET"].ToString();
-
-                    DataTable datosRetencion = await _accesoDatosService.ObtenerDatosRetencion(cod_concepto);
-                    DataTable datosProveedor = await _accesoDatosService.ObtenerDatosProveedor(ordenDePago.CodigoProveedor);
 
                     string importeImponible = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "P", cod_concepto);
                     string importeRetenido = await _accesoDatosService.ObtenerImportes(parametros, num_retencion, "R", cod_concepto);
                     string importeOrigina = await _accesoDatosService.ObtenerImporteOrigina(parametros);
+
+                    if (egrc_tipo == "M")
+                        cod_concepto = await _accesoDatosService.ObtenerCodigoConcepto(ordenDePago.CodigoProveedor, "IBMENDOZA");
+
+                    DataTable datosRetencion = await _accesoDatosService.ObtenerDatosRetencion(cod_concepto);
+                    DataTable datosProveedor = await _accesoDatosService.ObtenerDatosProveedor(ordenDePago.CodigoProveedor);
 
                     RetencionModel ret = await _mapeoDatosService.MapeoRetenciones(cod_concepto, num_retencion, 
                         datosRetencion, importeImponible, importeRetenido, importeOrigina,

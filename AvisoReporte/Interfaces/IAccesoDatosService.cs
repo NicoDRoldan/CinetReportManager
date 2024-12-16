@@ -22,5 +22,6 @@ namespace AvisoReporte.Interfaces
         Task<string> ObtenerImportes(List<string> parametros, string num_retencion, string tipoDeImporte, string cod_concepto);
         Task<string> ObtenerImporteOrigina(List<string> parametros);
         Task<DataTable> ObtenerDatosProveedor(string cod_proveedor);
+        Task<string> ObtenerCodigoConcepto(string pro_codigo, string cod_impuesto);
     }
 }

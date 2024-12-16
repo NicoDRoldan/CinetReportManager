@@ -154,7 +154,7 @@ namespace AvisoReporte.Services
                 {
                     NumeroRetencion = num_retencion,
                     CodigoRetencion = cod_retencion,
-                    CodigoConcepto = cod_concepto,
+                    CodigoConcepto = cod_concepto.Trim(),
                     Fecha = ordenDePago.FechaOPA,
                     IB = "901-039363-6", // Dato hardcodeado
                     AgenteRetencion = new AgenteRetencionModel()

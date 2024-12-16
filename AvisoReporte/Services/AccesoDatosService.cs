@@ -80,7 +80,7 @@ namespace AvisoReporte.Services
             var parametrosAdd = new List<string>(parametros);
             try
             {
-                string consulta = @$"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO FROM EGRESOS_C
+                string consulta = @$"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C
                                     WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
                                     AND EGRC_NUMRET != '0' AND EGRC_CONCEPTO != '' ";
 
@@ -113,6 +113,21 @@ namespace AvisoReporte.Services
                 string consulta = @$"SELECT RETEN_CODIGO, RETEN_CODCONCEPTO, RETEN_DESCCONCEPTO FROM RETEN_TABLA WHERE RETEN_CODCONCEPTO = ? ";
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametros);
                 return registros;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string> ObtenerCodigoConcepto(string pro_codigo, string cod_impuesto)
+        {
+            var parametros = new List<string> { pro_codigo, cod_impuesto };
+            try
+            {
+                string consulta = "SELECT DISTINCT RETEN_CODCONCEPTO FROM PRORETEN WHERE PRO_CODIGO = ? AND RETEN_CODIGO = ?";
+                string resultado = await _conn.ObtenerRegistroAsync(consulta, parametros);
+                return resultado;
             }
             catch (Exception ex)
             {
