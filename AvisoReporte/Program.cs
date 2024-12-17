@@ -34,18 +34,20 @@ Log.Logger = new LoggerConfiguration()
 
 var app = host.Services.GetRequiredService<AvisoReporteApp>();
 
+List<string> impuestos = new List<string> { "RG830", "IIBB", "IVAM", "IIBBCABA", "IBMENDOZA", "IIBBSFE" };
+
 if (args.Length == 1) /* Generación de reportes común */
 {
     //Formado esperado: 009840OPA999900000001
     await app.AvisoReporte(args[0]);
 }
 /* Si la cantidad de parámetros es mayor a 1 se procede de otra forma */
-else if (args.Length > 1 && args[1].ToUpper().Contains("RET")) /* Llamado a reimpresión de retenciones */
+else if (args.Length > 1 && impuestos.Contains(args[1].ToUpper())) /* Llamado a reimpresión de retenciones */
 {
     //Formado esperado: 009840OPA999900000001 | RET+NOMBRERETENCION (o RET+* para todas las retenciones) 
     await app.ReimpresionRetenciones(args[0], args[1]);
 }
-else if (args.Length > 1) /* Llamado a reimpresión de comprobantes */
+else if (args.Length > 1 && (args[1].ToUpper() == "TRUE" || args[1].ToUpper() == "FALSE")) /* Llamado a reimpresión de comprobantes */
 {
     //Formado esperado: 009840OPA999900000001 | True o False para envío de email
     await app.ReimpresionReporte(args[0], args[1]);
