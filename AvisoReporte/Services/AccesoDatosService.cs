@@ -34,7 +34,8 @@ namespace AvisoReporte.Services
         public async Task<DataTable> ObtenerDatosDeLiquidacion(List<string> parametros, string codProveedor)
         {
             string consulta = @$"select CTAP_TIPOCBTE1, CTAP_NUMERO1, COME_FECHA, REPLACE(CONVERT(VARCHAR(100), cc.CTAP_IMPORTE),'-', '') AS CTAP_IMPORTE 
-                                    from COMPRAS_E c right join CPRAS_CTACTE cc on c.COME_NUMERO = cc.CTAP_NUMERO1 and c.PRO_CODIGO = cc.PRO_CODIGO 
+                                    from COMPRAS_E c 
+                                    right join CPRAS_CTACTE cc on c.COME_NUMERO = cc.CTAP_NUMERO1 and c.PRO_CODIGO = cc.PRO_CODIGO and c.CBTEE_CODIGO = cc.CTAP_TIPOCBTE1
                                     WHERE CTAP_TIPOCBTE2= ? and CTAP_NUMERO2 = ? and ctaP_sucursal2 = ? 
                                     ORDER BY CTAP_NUMERO1, COME_FECHA;";
 
