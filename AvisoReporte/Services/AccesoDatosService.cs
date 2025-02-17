@@ -87,11 +87,21 @@ namespace AvisoReporte.Services
 
                 if (!string.IsNullOrEmpty(retencionFiltro))
                 {
-                    parametrosAdd.Add(retencionFiltro);
-                    consulta = $@"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C C 
+                    if(retencionFiltro == "IBMENDOZA")
+                    {
+                        consulta = $@"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C C 
+                                    INNER JOIN RETEN_TABLA r ON r.RETEN_CODCONCEPTO = c.EGRC_CONCEPTO 
+                                    WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
+                                    AND EGRC_NUMRET != '0' AND SUBSTRING(EGRC_TIPO, 1, 1) = 'M' ";
+                    }
+                    else
+                    {
+                        parametrosAdd.Add(retencionFiltro);
+                        consulta = $@"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C C 
                                     INNER JOIN RETEN_TABLA r ON r.RETEN_CODCONCEPTO = c.EGRC_CONCEPTO 
                                     WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
                                     AND EGRC_NUMRET != '0' AND RETEN_CODIGO = ? ";
+                    }
                 }
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametrosAdd);
                 if (registros is null || registros.Rows.Count == 0)
