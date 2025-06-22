@@ -50,7 +50,7 @@ namespace CinetReportManager.Events
             Canvas canvas = new Canvas(page, rootArea);
 
             // Si la empresa es GALDEANO_ERP, la cabecera será diferente.
-            if (!string.IsNullOrEmpty(_baseEmpresa) && _baseEmpresa == "GALDEANO_ERP")
+            if (!string.IsNullOrEmpty(_baseEmpresa) && (_baseEmpresa == "GALDEANO_ERP" || _baseEmpresa == "GADA_ERP"))
                 canvas.Add(_ordenDePagoService.TablaEncabezado(_ordenDepago, _fonts, _baseEmpresa));
             else
                 canvas.Add(_ordenDePagoService.TablaEncabezado(_ordenDepago, _rutaImagen, _fonts[0]));

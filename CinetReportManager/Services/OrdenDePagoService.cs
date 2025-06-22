@@ -83,6 +83,12 @@ namespace CinetReportManager.Services
                 _Direccion_Empresa = "COSSETTINI,OLGA 152 Piso:8 Dpto:7\r\nCIUDAD AUTONOMA BUENOS AIRES\r\n";
                 _Tipo_Comprobante = "Orden de Pago";
             }
+            else if(baseEmpresa.ToUpper() == "GADA_ERP")
+            {
+                _Razon_Social_Empresa = "GADA GROUP";
+                _Direccion_Empresa = "COSSETTINI,OLGA 152 Piso:8 Dpto:7\r\nCIUDAD AUTONOMA BUENOS AIRES\r\n";
+                _Tipo_Comprobante = "Orden de Pago";
+            }
 
             Table tablaEncabezado = new Table(new float[] { 3, 1 });
             tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));

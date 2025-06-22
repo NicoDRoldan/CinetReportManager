@@ -22,12 +22,12 @@ namespace CinetReportManager.Events
         private readonly IOrdenDePagoService _ordenDePagoService;
 
         RetencionModel _retencion;
-        byte[] _firma;
+        byte[]? _firma;
         List<byte[]> _fuentes;
         string _aclaracion_firma;
         bool _reportePrincipal;
 
-        public FirmaHandlerReten(RetencionModel retencion, List<byte[]> fuentes, byte[] firma, string aclaracion_firma, bool reportePrincipal)
+        public FirmaHandlerReten(RetencionModel retencion, List<byte[]> fuentes, byte[]? firma, string aclaracion_firma, bool reportePrincipal)
         {
             _retencion = retencion;
             _firma = firma;
@@ -48,7 +48,10 @@ namespace CinetReportManager.Events
             Rectangle pageSizeAclaracion = new Rectangle(36, page.GetPageSize().GetTop() - 890, page.GetPageSize().GetWidth() - 72, 100);
             Rectangle pageSizeImporte = new Rectangle(20, page.GetPageSize().GetTop() - 930, page.GetPageSize().GetWidth() - 72, 100);
 
-            if(!_retencion.AgenteRetencion.Denominacion.Contains("GALDEANO"))
+            List<string> empresas = new List<string> { "GALDEANO", "GADA GROUP" };
+            bool noFirma = empresas.Any(e => _retencion.AgenteRetencion.Denominacion.Contains(e));
+
+            if(!noFirma)
             {
                 ImageData imageData = ImageDataFactory.Create(_firma);
                 Image firma = new Image(imageData);

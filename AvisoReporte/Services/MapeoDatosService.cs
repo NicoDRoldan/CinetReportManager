@@ -182,7 +182,7 @@ namespace AvisoReporte.Services
                     BaseImponible = importeImponibleDecimal,
                     Porcentaje = porcentajeCalculado,
                     ImporteRetencion = importeRetenidoDecimal,
-                    Firma = "MOSTAZA Y PAN S.A. APODERADO" // Dato hardcodeado
+                    Firma = baseEmpresa == "MOSTAZA_ERP" ? "MOSTAZA Y PAN S.A. APODERADO" : null
                 };
 
                 return retencionModel;
@@ -216,6 +216,9 @@ namespace AvisoReporte.Services
                 case "RG830":
                     tipo_impuesto = "Impuesto a las Ganancias";
                     break;
+                case "RETSUSSPAG":
+                    tipo_impuesto = "Aportes Seguridad Social (SUSS)";
+                    break;
             }
             return tipo_impuesto;
         }
@@ -228,6 +231,13 @@ namespace AvisoReporte.Services
                 _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
                 _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
                 _CuitAgente = "20-23426454-1"; // Dato hardcodeado
+            }
+            else if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GADA_ERP")
+            {
+                _Denominacion = "GADA GROUP"; // Dato hardcodeado
+                _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
+                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                _CuitAgente = "30-71583994-2"; // Dato hardcodeado
             }
             else
             {

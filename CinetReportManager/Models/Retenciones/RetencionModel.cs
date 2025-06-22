@@ -13,6 +13,6 @@
         public decimal BaseImponible { get; set; }
         public decimal Porcentaje { get; set; }
         public decimal ImporteRetencion { get; set; }
-        public string Firma { get; set; }
+        public string? Firma { get; set; }
     }
 }

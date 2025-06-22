@@ -1,7 +1,8 @@
 {
   "profiles": {
     "AvisoReporte": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "00040OPA012100001665"
     }
   }
 }

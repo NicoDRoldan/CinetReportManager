@@ -130,12 +130,6 @@ namespace CinetReportManager.Services
                 }
                 stream.Position = 0;
                 return stream;
-                /* Las siguientes líneas están comentadas debido a que se 
-                 * dio marcha atras con el envío de los documentos en formato zip
-                 */
-                //var zipStream = await ComprimirReporte(stream, ordenDePago.NumeroComprobanteOPA);
-                //stream.Position = 0;
-                //return zipStream;
             }
             catch (Exception ex)
             {
@@ -163,9 +157,9 @@ namespace CinetReportManager.Services
                     {
                         // Tipo de reporte
                         bool reportePrincipal = true;
-
+                        
                         // Firma
-                        var rutaFirma = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.firma.bmp");
+                        var rutaFirma = retencion.Firma is null ? null : await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.firma.bmp");
 
                         // Fuentes
                         var fuenteTNRR = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.TimesNewRomanRegular.ttf");
@@ -178,7 +172,7 @@ namespace CinetReportManager.Services
                         string Retencion_Titulo = "";
                         string Nombre_Impuesto = "";
                         string Nombre_Comprobante = "";
-                        string Aclaracion_Firma = retencion.Firma;
+                        string Aclaracion_Firma = retencion.Firma ?? "";
 
                         switch (retencion.CodigoRetencion)
                         {
@@ -211,6 +205,11 @@ namespace CinetReportManager.Services
                             case "RG830":
                                 Retencion_Titulo = "RETENCIONES DE GANANCIAS";
                                 Nombre_Impuesto = "Impuesto a las Ganancias";
+                                reportePrincipal = false;
+                                break;
+                            case "RETSUSSPAG":
+                                Retencion_Titulo = "RETENCIONES DE SEGURIDAD SOCIAL (SUSS)";
+                                Nombre_Impuesto = "Aportes Seguridad Social (SUSS)";
                                 reportePrincipal = false;
                                 break;
                             default: break;
