@@ -159,7 +159,7 @@ namespace CinetReportManager.Services
                         bool reportePrincipal = true;
                         
                         // Firma
-                        var rutaFirma = retencion.Firma is null ? null : await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.firma.bmp");
+                        var rutaFirma = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.firma.bmp");
 
                         // Fuentes
                         var fuenteTNRR = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.TimesNewRomanRegular.ttf");

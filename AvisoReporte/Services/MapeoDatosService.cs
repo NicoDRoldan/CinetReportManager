@@ -232,7 +232,7 @@ namespace AvisoReporte.Services
                 _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
                 _CuitAgente = "20-23426454-1"; // Dato hardcodeado
             }
-            else if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GADA_ERP")
+            else if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GADA_GROUP_ERP")
             {
                 _Denominacion = "GADA GROUP"; // Dato hardcodeado
                 _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado

@@ -68,7 +68,7 @@ namespace AvisoReporte.Data
                     Base_Odbc = "GALDEANO_ERP";
                     break;
                 case "8":
-                    Base_Odbc = "GADA_ERP";
+                    Base_Odbc = "GADA_GROUP_ERP";
                     break;
                 case "100":
                     Base_Odbc = "TEST_ERP";
