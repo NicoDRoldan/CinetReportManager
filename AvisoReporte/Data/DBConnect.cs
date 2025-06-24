@@ -131,6 +131,25 @@ namespace AvisoReporte.Data
             }
         }
 
+        public async Task<DataTable> ObtenerRegistrosAsync(string query)
+        {
+            var tabla = new DataTable();
+            try
+            {
+                var conn = await AbrirConexionAsync();
+                var cmd = new OdbcCommand(query, conn);
+                var da = new OdbcDataAdapter(cmd);
+                da.Fill(tabla);
+                da.Dispose();
+                await conn.CloseAsync();
+                return tabla;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al ejecutar la consulta: {ex.Message}");
+            }
+        }
+
         public async Task<string> ObtenerRegistroAsync(string query, List<string> parameters)
         {
             try

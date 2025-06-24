@@ -207,12 +207,16 @@ namespace CinetReportManager.Services
                                 Nombre_Impuesto = "Impuesto a las Ganancias";
                                 reportePrincipal = false;
                                 break;
-                            case "RETSUSSPAG":
+                            case "RSUSS":
                                 Retencion_Titulo = "RETENCIONES DE SEGURIDAD SOCIAL (SUSS)";
                                 Nombre_Impuesto = "Aportes Seguridad Social (SUSS)";
                                 reportePrincipal = false;
                                 break;
-                            default: break;
+                            default:
+                                Retencion_Titulo = retencion.RetencionPracticada.TipoImpuesto ?? "";
+                                Nombre_Impuesto = retencion.RetencionPracticada.DescripcionReten ?? "";
+                                reportePrincipal = true;
+                                break;
                         }
 
                         switch (retencion.RetencionPracticada.TipoComprobante)

@@ -48,10 +48,11 @@ namespace CinetReportManager.Events
             Rectangle pageSizeAclaracion = new Rectangle(36, page.GetPageSize().GetTop() - 890, page.GetPageSize().GetWidth() - 72, 100);
             Rectangle pageSizeImporte = new Rectangle(20, page.GetPageSize().GetTop() - 930, page.GetPageSize().GetWidth() - 72, 100);
 
-            List<string> empresas = new List<string> { "GALDEANO", "GADA GROUP" };
-            bool noFirma = empresas.Any(e => _retencion.AgenteRetencion.Denominacion.Contains(e));
+            bool usaFirma = true;
+            if (_retencion.AgenteRetencion.Denominacion != "Mostaza y Pan S.A")
+                usaFirma = false;
 
-            if(!noFirma)
+            if (usaFirma)
             {
                 ImageData imageData = ImageDataFactory.Create(_firma);
                 Image firma = new Image(imageData);

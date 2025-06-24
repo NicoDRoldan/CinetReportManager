@@ -121,7 +121,7 @@ namespace AvisoReporte.Services
             try
             {
                 List<string> parametros = new List<string> { cod_concepto };
-                string consulta = @$"SELECT RETEN_CODIGO, RETEN_CODCONCEPTO, RETEN_DESCCONCEPTO FROM RETEN_TABLA WHERE RETEN_CODCONCEPTO = ? ";
+                string consulta = @$"SELECT RTRIM(RETEN_CODIGO) [RETEN_CODIGO], RETEN_CODCONCEPTO, RETEN_DESCCONCEPTO FROM RETEN_TABLA WHERE RETEN_CODCONCEPTO = ? ";
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametros);
                 return registros;
             }

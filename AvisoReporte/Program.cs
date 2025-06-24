@@ -34,7 +34,7 @@ Log.Logger = new LoggerConfiguration()
 
 var app = host.Services.GetRequiredService<AvisoReporteApp>();
 
-List<string> impuestos = new List<string> { "RG830", "IIBB", "IVAM", "IIBBCABA", "IBMENDOZA", "IIBBSFE", "RETSUSSPAG" };
+List<string> impuestos = new List<string> { "RG830", "IIBB", "IVAM", "IIBBCABA", "IBMENDOZA", "IIBBSFE", "RSUSS" };
 
 if (args.Length == 1) /* Generación de reportes común */
 {

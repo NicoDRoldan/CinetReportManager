@@ -3,6 +3,7 @@ using AvisoReporte.Models.Comprobante;
 using AvisoReporte.Models.Retenciones;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -216,35 +217,44 @@ namespace AvisoReporte.Services
                 case "RG830":
                     tipo_impuesto = "Impuesto a las Ganancias";
                     break;
-                case "RETSUSSPAG":
+                case "RSUSS":
                     tipo_impuesto = "Aportes Seguridad Social (SUSS)";
+                    break;
+                default:
+                    tipo_impuesto = cod_retencion;
                     break;
             }
             return tipo_impuesto;
         }
 
-        public async Task ValidarDatosAgentesDeRetencion(string? baseEmpresa = null)
+        public async Task ValidarDatosAgentesDeRetencion(string baseEmpresa)
         {
-            if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GALDEANO_ERP")
+            switch (baseEmpresa)
             {
-                _Denominacion = "GALDEANO ALVARADO CHRISTIAN DANIEL"; // Dato hardcodeado
-                _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
-                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
-                _CuitAgente = "20-23426454-1"; // Dato hardcodeado
-            }
-            else if (!string.IsNullOrEmpty(baseEmpresa) && baseEmpresa == "GADA_GROUP_ERP")
-            {
-                _Denominacion = "GADA GROUP"; // Dato hardcodeado
-                _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
-                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
-                _CuitAgente = "30-71583994-2"; // Dato hardcodeado
-            }
-            else
-            {
-                _Denominacion = "Mostaza y Pan S.A"; // Dato hardcodeado
-                _DireccionAgente = "Au. Bs.As. - La Plata Km.9 Local 1003, Avellaneda - Pcía de Buenos Aires."; // Dato hardcodeado
-                _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
-                _CuitAgente = "33-70701313-9"; // Dato hardcodeado
+                case "GADA_GROUP_ERP":
+                    _Denominacion = "GADA GROUP"; // Dato hardcodeado
+                    _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
+                    _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                    _CuitAgente = "30-71583994-2"; // Dato hardcodeado
+                    break;
+                case "GALDEANO_ERP":
+                    _Denominacion = "GALDEANO ALVARADO CHRISTIAN DANIEL"; // Dato hardcodeado
+                    _DireccionAgente = "COSSETTINI,OLGA 152 Piso:8 Dpto:7, CIUDAD AUTONOMA BUENOS AIRES"; // Dato hardcodeado
+                    _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                    _CuitAgente = "20-23426454-1"; // Dato hardcodeado
+                    break;
+                case "MOSTAZA_ERP":
+                    _Denominacion = "Mostaza y Pan S.A"; // Dato hardcodeado
+                    _DireccionAgente = "Au. Bs.As. - La Plata Km.9 Local 1003, Avellaneda - Pcía de Buenos Aires."; // Dato hardcodeado
+                    _IvaAgente = "Responsable Inscripto"; // Dato hardcodeado
+                    _CuitAgente = "33-70701313-9"; // Dato hardcodeado
+                    break;
+                default:
+                    _Denominacion = ConfigurationManager.AppSettings["Agente.Default.Denominacion"] ?? "-";
+                    _DireccionAgente = ConfigurationManager.AppSettings["Agente.Default.Direccion"] ?? "-";
+                    _IvaAgente = ConfigurationManager.AppSettings["Agente.Default.Iva"] ?? "-";
+                    _CuitAgente = ConfigurationManager.AppSettings["Agente.Default.Cuit"] ?? "-";
+                    break;
             }
         }
     }
