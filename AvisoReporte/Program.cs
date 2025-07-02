@@ -7,6 +7,11 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
+using System.Globalization;
+
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-ES");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-ES");
+
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
