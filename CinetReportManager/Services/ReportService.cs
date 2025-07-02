@@ -133,7 +133,7 @@ namespace CinetReportManager.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al generar el reporte: {ex.Message}");
+                throw new Exception($"Error al generar el reporte: {ex}");
             }
         }
 

@@ -65,10 +65,11 @@ namespace CinetReportManager.Events
             {
                 Total_Pago_Facturas = _ordenDepago.Liquidaciones.Sum(s => s.ImportePagado);
             }
-            string sumTotalString = Total_Pago_Facturas.ToString();
-            int decimalTotal = Convert.ToInt32(sumTotalString.Substring(sumTotalString.LastIndexOf(',')).Replace(',', ' '));
-            string sumaTotalEnLetras = Convert.ToInt32(Total_Pago_Facturas).ToWords(new System.Globalization.CultureInfo("es"));
-            string decimalesEnLetras = decimalTotal.ToWords(new System.Globalization.CultureInfo("es"));
+            int parteEntera = (int)Math.Truncate(Total_Pago_Facturas);
+            int parteDecimal = (int)Math.Round((Total_Pago_Facturas - parteEntera) * 100);
+
+            string sumaTotalEnLetras = parteEntera.ToWords(new System.Globalization.CultureInfo("es"));
+            string decimalesEnLetras = parteDecimal.ToWords(new System.Globalization.CultureInfo("es"));
 
             Paragraph sumaTotalEnLetrasParagraph = new Paragraph($"Recibí la suma de Pesos\n {sumaTotalEnLetras} con {decimalesEnLetras} centavos.").SetTextAlignment(TextAlignment.LEFT)
                 .SetCharacterSpacing(1).SetFontSize(9).SetFont(PdfFontFactory.CreateFont(_fonts[1], PdfEncodings.WINANSI))

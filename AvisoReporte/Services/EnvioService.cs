@@ -43,6 +43,7 @@ namespace AvisoReporte.Services
                 HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarReporte");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
+                Log.Information($"Respuesta API:\n {msgJson}");
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
 
                 if (respuestaMsg.IsSuccessStatusCode)
@@ -69,6 +70,7 @@ namespace AvisoReporte.Services
                 HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarRetencion");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
+                Log.Information($"Respuesta API:\n {msgJson}");
                 RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
 
                 if (respuestaMsg.IsSuccessStatusCode)
