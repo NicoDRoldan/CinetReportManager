@@ -69,6 +69,8 @@ namespace CinetReportManager.Controllers
                         sb.AppendLine($"Error en la generación de retenciones. Validar. {ex.Message}");
                     }
                 }
+
+                /* Envío de Email */
                 try
                 {
                     await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);

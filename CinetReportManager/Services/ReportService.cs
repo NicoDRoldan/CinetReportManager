@@ -32,18 +32,20 @@ namespace CinetReportManager.Services
         private readonly IOrdenDePagoService _ordenDePagoService;
         private readonly IRetencionService _retencionService;
         private readonly IConfiguration _configuration;
+        private readonly IPrintService _printService;
 
         private string _numeroComprobante;
         private string _codComprobante;
         private string _codProveedor;
         private string _rutaReporte;
 
-        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration)
+        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration, IPrintService printService)
         {
             _ordenDePagoService = ordenDePagoService;
             _retencionService = retencionService;
             _configuration = configuration;
             _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
+            _printService = printService;
         }
 
         public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null)
@@ -129,6 +131,17 @@ namespace CinetReportManager.Services
                     await stream.CopyToAsync(fileStream);
                 }
                 stream.Position = 0;
+
+                // Imprimir reporte
+                try
+                {
+                    await _printService.ImprimirReporte(rutaArchivo);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error al imprimir el reporte: {ex}");
+                }
+
                 return stream;
             }
             catch (Exception ex)
@@ -281,6 +294,17 @@ namespace CinetReportManager.Services
                     await stream.CopyToAsync(fileStream);
                 }
                 stream.Position = 0;
+
+                // Imprimir reporte
+                try
+                {
+                    await _printService.ImprimirReporte(rutaArchivo);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al imprimir el reporte: {ex}");
+                }
+
                 return stream;
             }
             catch (Exception ex)

@@ -39,6 +39,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddTransient<IOrdenDePagoService, OrdenDePagoService>();
 builder.Services.AddTransient<IRetencionService, RetencionService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPrintService, PrintService>();
 
 var app = builder.Build();
 
