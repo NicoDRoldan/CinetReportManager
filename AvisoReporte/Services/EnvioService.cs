@@ -34,7 +34,7 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
+        public async Task<GenerarReporteResponse> LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
         {
             try
             {
@@ -56,6 +56,8 @@ namespace AvisoReporte.Services
                         {
                             Log.Information($"{archivo}");
                         }
+
+                        return respuestaApi;
                     }
                     else
                     {
@@ -73,7 +75,7 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task LlamadoApiCinetReportManager(List<RetencionModel> retenciones)
+        public async Task<GenerarReporteResponse> LlamadoApiCinetReportManager(List<RetencionModel> retenciones)
         {
             try
             {
@@ -93,6 +95,8 @@ namespace AvisoReporte.Services
                     {
                         Log.Information($"{archivo}");
                     }
+
+                    return respuestaApi;
                 }
                 else
                 {

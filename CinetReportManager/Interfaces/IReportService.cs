@@ -6,8 +6,8 @@ namespace CinetReportManager.Interfaces
 {
     public interface IReportService
     {
-        Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null);
-        Task<MemoryStream> GenerarReporteRetencion(RetencionModel retencion);
+        Task<ReporteGeneradoDto> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null);
+        Task<ReporteGeneradoDto> GenerarReporteRetencion(RetencionModel retencion);
         Task<GenerarReporteResponse> GenerarReporte(LlamadoDto llamadoDto);
         Task<GenerarReporteResponse> GenerarRetenciones(List<RetencionModel> retenciones);
     }

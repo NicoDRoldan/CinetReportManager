@@ -3,19 +3,7 @@ using AvisoReporte.Interfaces;
 using AvisoReporte.Models.Comprobante;
 using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
-using AvisoReporte.Services;
-using Newtonsoft.Json;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AvisoReporte
 {
@@ -25,13 +13,15 @@ namespace AvisoReporte
         private readonly IEnvioService _envioService;
         private readonly IDatosReporteService _datosReporteService;
         private readonly IDatosReportesRetencionesServices _datosReportesRetencionesServices;
+        private readonly IPrintService _printService;
 
-        public AvisoReporteApp (DBConnect conn, IEnvioService envioService ,IDatosReporteService datosReporteService, IDatosReportesRetencionesServices datosReportesRetencionesServices)
+        public AvisoReporteApp (DBConnect conn, IEnvioService envioService ,IDatosReporteService datosReporteService, IDatosReportesRetencionesServices datosReportesRetencionesServices, IPrintService printService)
         {
             _conn = conn;
             _envioService = envioService;
             _datosReporteService = datosReporteService;
             _datosReportesRetencionesServices = datosReportesRetencionesServices;
+            _printService = printService;
         }
 
         public async Task AvisoReporte(string claves, bool enviaEmail = true)
@@ -78,7 +68,10 @@ namespace AvisoReporte
                 };
 
                 // Enviar información a CinetReportManager:
-                await _envioService.LlamadoApiCinetReportManager(llamadoDto);
+                var respuestaApi = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
+
+                // Proceso de impresión:
+                await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
             }
             catch (Exception ex)
             {
@@ -98,7 +91,10 @@ namespace AvisoReporte
 
                 List<RetencionModel> retenciones = await _datosReportesRetencionesServices.ObtenerRetencion(opa, cod_retencion);
 
-                await _envioService.LlamadoApiCinetReportManager(retenciones);
+                var respuestaApi = await _envioService.LlamadoApiCinetReportManager(retenciones);
+
+                // Proceso de impresión:
+                await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
             }
             catch (Exception ex)
             {

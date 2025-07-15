@@ -52,7 +52,7 @@ namespace CinetReportManager.Services
             _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
         }
 
-        public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null)
+        public async Task<ReporteGeneradoDto> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null)
         {
             _numeroComprobante = ordenDePago.NumeroComprobanteOPA;
             _codComprobante = ordenDePago.CodigoComprobante;
@@ -144,17 +144,11 @@ namespace CinetReportManager.Services
                 }
                 stream.Position = 0;
 
-                /* Se imprime el reporte */
-                try
+                return new ReporteGeneradoDto
                 {
-                    await _printService.ImprimirReporte(rutaArchivo);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine($"Error al imprimir el reporte: {ex}");
-                }
-
-                return stream;
+                    RutaArchivo = rutaArchivo,
+                    StreamArchivo = stream
+                };
             }
             catch (Exception ex)
             {
@@ -162,7 +156,7 @@ namespace CinetReportManager.Services
             }
         }
 
-        public async Task<MemoryStream> GenerarReporteRetencion(RetencionModel retencion)
+        public async Task<ReporteGeneradoDto> GenerarReporteRetencion(RetencionModel retencion)
         {
             _numeroComprobante = retencion.RetencionPracticada.NumeroComprobante;
             _codComprobante = retencion.RetencionPracticada.TipoComprobante;
@@ -307,17 +301,11 @@ namespace CinetReportManager.Services
                 }
                 stream.Position = 0;
 
-                // Imprimir reporte
-                try
+                return new ReporteGeneradoDto
                 {
-                    await _printService.ImprimirReporte(rutaArchivo);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al imprimir el reporte: {ex}");
-                }
-
-                return stream;
+                    RutaArchivo = rutaArchivo,
+                    StreamArchivo = stream
+                };
             }
             catch (Exception ex)
             {
@@ -342,8 +330,11 @@ namespace CinetReportManager.Services
                 /* Llamado al método para generar el reporte. 
                  En dicho llamado, se guarda en el nombre del archivo del diccionario declarado anteriormente, el stream del archivo generado */
                 string nombreArchivoCbte = $"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf";
-                streamsDictionary[nombreArchivoCbte] = await GenerarReporteOrdenDePago(llamadoDto.OrdenDePago, llamadoDto.BaseEmpresa);
-                response.ArchivosGenerados.Add(nombreArchivoCbte);
+
+                var reporteGenerado = await GenerarReporteOrdenDePago(llamadoDto.OrdenDePago, llamadoDto.BaseEmpresa);
+                streamsDictionary[nombreArchivoCbte] = reporteGenerado.StreamArchivo;
+
+                response.ArchivosGenerados.Add(reporteGenerado.RutaArchivo);
 
                 sbRespuesta.AppendLine($"Se generó el reporte del comprobante {llamadoDto.OrdenDePago.CodigoComprobante} - {llamadoDto.OrdenDePago.NumeroComprobanteOPA}.");
 
@@ -358,8 +349,12 @@ namespace CinetReportManager.Services
                             try
                             {
                                 string nombreArchivoRet = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
-                                streamsDictionary[nombreArchivoRet] = await GenerarReporteRetencion(retencion);
-                                response.ArchivosGenerados.Add(nombreArchivoRet);
+
+                                var reporteGeneradoRet = await GenerarReporteRetencion(retencion);
+                                streamsDictionary[nombreArchivoRet] = reporteGeneradoRet.StreamArchivo;
+
+                                response.ArchivosGenerados.Add(reporteGeneradoRet.RutaArchivo);
+
                                 sbRespuesta.AppendLine($"Se generó reporte de la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion}");
                             }
                             catch (Exception ex)
@@ -420,10 +415,9 @@ namespace CinetReportManager.Services
                 {
                     try
                     {
-                        await GenerarReporteRetencion(retencion);
+                        var reporteGeneradoRet = await GenerarReporteRetencion(retencion);
 
-                        string nombreArchivoRet = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
-                        response.ArchivosGenerados.Add(nombreArchivoRet);
+                        response.ArchivosGenerados.Add(reporteGeneradoRet.RutaArchivo);
 
                         sb.AppendLine($"Se generó la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion}.");
                         i++;

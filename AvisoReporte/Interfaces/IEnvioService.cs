@@ -11,7 +11,7 @@ namespace AvisoReporte.Interfaces
     public interface IEnvioService
     {
         Task<HttpResponseMessage> PostAsyncRequest(string json, string host, string port, string controller, string endpoint);
-        Task LlamadoApiCinetReportManager(LlamadoDto llamadoDto);
-        Task LlamadoApiCinetReportManager(List<RetencionModel> retenciones);
+        Task<GenerarReporteResponse> LlamadoApiCinetReportManager(LlamadoDto llamadoDto);
+        Task<GenerarReporteResponse> LlamadoApiCinetReportManager(List<RetencionModel> retenciones);
     }
 }

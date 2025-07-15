@@ -22,6 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddScoped<IDatosReporteService, DatosReporteService>();
         services.AddScoped<IDatosReportesRetencionesServices, DatosReportesRetencionesService>();
         services.AddScoped<IEnvioService, EnvioService>();
+        services.AddScoped<IPrintService, PrintService>();
     })
     .Build();
 
