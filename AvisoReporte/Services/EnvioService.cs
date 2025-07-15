@@ -34,7 +34,7 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task<string> LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
+        public async Task LlamadoApiCinetReportManager(LlamadoDto llamadoDto)
         {
             try
             {
@@ -43,16 +43,28 @@ namespace AvisoReporte.Services
                 HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarReporte");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
-                Log.Information($"Respuesta API:\n {msgJson}");
-                RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
+                var respuestaApi = JsonConvert.DeserializeObject<GenerarReporteResponse>(msgJson);
 
                 if (respuestaMsg.IsSuccessStatusCode)
                 {
-                    return respuestaApi.Message;
+                    if (respuestaApi.Success)
+                    { 
+                        Log.Information(respuestaApi.Message);
+                        Log.Information($"Archivos Generados:");
+
+                        foreach(var archivo in respuestaApi.ArchivosGenerados)
+                        {
+                            Log.Information($"{archivo}");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(respuestaApi.Message);
+                    }
                 }
                 else
                 {
-                    throw new Exception(respuestaApi.Message);
+                    throw new Exception(msgJson);
                 }
             }
             catch(Exception ex) 
@@ -61,7 +73,7 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task<string> LlamadoApiCinetReportManager(List<RetencionModel> retenciones)
+        public async Task LlamadoApiCinetReportManager(List<RetencionModel> retenciones)
         {
             try
             {
@@ -70,16 +82,21 @@ namespace AvisoReporte.Services
                 HttpResponseMessage respuestaMsg = await PostAsyncRequest(json, _HostApi, _PortApi, "ReportManager", "GenerarRetencion");
 
                 string msgJson = await respuestaMsg.Content.ReadAsStringAsync();
-                Log.Information($"Respuesta API:\n {msgJson}");
-                RespuestaApi respuestaApi = JsonConvert.DeserializeObject<RespuestaApi>(msgJson);
+                var respuestaApi = JsonConvert.DeserializeObject<GenerarReporteResponse>(msgJson);
 
                 if (respuestaMsg.IsSuccessStatusCode)
                 {
-                    return respuestaApi.Message;
+                    Log.Information(respuestaApi.Message);
+                    Log.Information($"Archivos Generados:");
+
+                    foreach (var archivo in respuestaApi.ArchivosGenerados)
+                    {
+                        Log.Information($"{archivo}");
+                    }
                 }
                 else
                 {
-                    throw new Exception(respuestaApi.Message);
+                    throw new Exception(msgJson);
                 }
             }
             catch (Exception ex)

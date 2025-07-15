@@ -87,13 +87,10 @@ namespace CinetReportManager.Services
                 }
 
                 await smtpClient.SendMailAsync(message);
-
-                Console.WriteLine("Se realizó el envío del email.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al enviar el email: {ex.Message}");
-                throw new Exception($"Error al enviar el email: {ex.Message}");
+                throw new Exception($"Error en envío de email: {ex.Message}");
             }
         }
 

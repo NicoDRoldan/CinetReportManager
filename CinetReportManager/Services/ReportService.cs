@@ -24,6 +24,8 @@ using iText.Signatures.Validation.V1;
 using iText.Kernel.Events;
 using iText.Kernel.Pdf.Canvas;
 using CinetReportManager.Events;
+using CinetReportManager.Models.DTO;
+using System.Text;
 
 namespace CinetReportManager.Services
 {
@@ -33,19 +35,21 @@ namespace CinetReportManager.Services
         private readonly IRetencionService _retencionService;
         private readonly IConfiguration _configuration;
         private readonly IPrintService _printService;
+        private readonly IEmailService _emailService;
 
         private string _numeroComprobante;
         private string _codComprobante;
         private string _codProveedor;
         private string _rutaReporte;
 
-        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration, IPrintService printService)
+        public ReportService(IOrdenDePagoService ordenDePagoService, IRetencionService retencionService, IConfiguration configuration, IPrintService printService, IEmailService emailService)
         {
             _ordenDePagoService = ordenDePagoService;
             _retencionService = retencionService;
             _configuration = configuration;
-            _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
             _printService = printService;
+            _emailService = emailService;
+            _rutaReporte = string.IsNullOrEmpty(_configuration.GetValue<string>("Parametros:RutaReporte")) ? @$"C:\Cinet\Profit\OPA" : _configuration.GetValue<string>("Parametros:RutaReporte");
         }
 
         public async Task<MemoryStream> GenerarReporteOrdenDePago(OrdenDePagoModel ordenDePago, string? baseEmpresa = null)
@@ -69,6 +73,7 @@ namespace CinetReportManager.Services
                 {
                     writer.SetCloseStream(false);
                     using (var pdf = new PdfDocument(writer))
+
                     /* doc es el objeto de tipo Document que se le pasa un objeto del tipo PdfDocument 
                      Con doc, se inicializa la primera página del documento */
                     using (var doc = new Document(pdf, PageSize.A4, false))
@@ -80,13 +85,14 @@ namespace CinetReportManager.Services
                         var rutaFont = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.TYPEWR_B.TTF");
                         var fontCourierNewRegular = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.CourierNewRegular.ttf");
 
+                        /* Guardo las fuentes en una lista */
                         List<byte[]> fonts = new List<byte[]> { rutaFont, fontCourierNewRegular };
 
-                        // Evento para la creación de Encabezado y Pie de página
-                        // Se va a crear un encabezado y pie por cada página que se cree.
+                        /* Evento para la creación de Encabezado y Pie de página
+                        Se va a crear un encabezado y pie por cada página que se cree. */
                         pdf.AddEventHandler(PdfDocumentEvent.START_PAGE, new EncabezadoHandler(_ordenDePagoService, ordenDePago, doc, rutaImagenLogo, fonts, baseEmpresa));
 
-                        // Sección de Liquidación en Pesos //
+                        /* Sección de Liquidación en Pesos */
                         //Header Liquidación en Pesos
                         if(ordenDePago.Liquidaciones.Count > 0)
                         {
@@ -101,7 +107,7 @@ namespace CinetReportManager.Services
                             doc.Add(tablaLiquidacion);
                         }
 
-                        // Sección de Valores //
+                        /* Sección de Valores */
                         //Header Valores
                         if (ordenDePago.ValoresIng.Count > 0)
                         {
@@ -125,14 +131,20 @@ namespace CinetReportManager.Services
                         }
                     }
                 }
-                using(var fileStream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
+
+                /* Se valida que el stream no este vacío */
+                if (stream is null || stream.Length == 0)
+                    throw new InvalidOperationException("No se guardó el reporte en memoria.");
+
+                /* Se guarda el archivo */
+                using (var fileStream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
                 {
                     stream.Position = 0;
                     await stream.CopyToAsync(fileStream);
                 }
                 stream.Position = 0;
 
-                // Imprimir reporte
+                /* Se imprime el reporte */
                 try
                 {
                     await _printService.ImprimirReporte(rutaArchivo);
@@ -146,7 +158,7 @@ namespace CinetReportManager.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error al generar el reporte: {ex}");
+                throw new Exception($"Error al generar la orden de pago: {ex}");
             }
         }
 
@@ -313,5 +325,130 @@ namespace CinetReportManager.Services
             }
         }
 
+        public async Task<GenerarReporteResponse> GenerarReporte(LlamadoDto llamadoDto)
+        {
+            GenerarReporteResponse response = new GenerarReporteResponse()
+            {
+                Success = false,
+                Message = ""
+            };
+
+            List<MemoryStream> streams = new List<MemoryStream>();
+            Dictionary<string, Stream> streamsDictionary = new Dictionary<string, Stream>();
+            StringBuilder sbRespuesta = new();
+
+            try
+            {
+                /* Llamado al método para generar el reporte. 
+                 En dicho llamado, se guarda en el nombre del archivo del diccionario declarado anteriormente, el stream del archivo generado */
+                string nombreArchivoCbte = $"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf";
+                streamsDictionary[nombreArchivoCbte] = await GenerarReporteOrdenDePago(llamadoDto.OrdenDePago, llamadoDto.BaseEmpresa);
+                response.ArchivosGenerados.Add(nombreArchivoCbte);
+
+                sbRespuesta.AppendLine($"Se generó el reporte del comprobante {llamadoDto.OrdenDePago.CodigoComprobante} - {llamadoDto.OrdenDePago.NumeroComprobanteOPA}.");
+
+                /* Generación de retenciones */
+                /* Si hay retenciones, entra al if */
+                if (llamadoDto.Retenciones is not null && llamadoDto.Retenciones.Any())
+                {
+                    try
+                    {
+                        foreach (var retencion in llamadoDto.Retenciones)
+                        {
+                            try
+                            {
+                                string nombreArchivoRet = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
+                                streamsDictionary[nombreArchivoRet] = await GenerarReporteRetencion(retencion);
+                                response.ArchivosGenerados.Add(nombreArchivoRet);
+                                sbRespuesta.AppendLine($"Se generó reporte de la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion}");
+                            }
+                            catch (Exception ex)
+                            {
+                                sbRespuesta.AppendLine($"Error en la generación de la retención {retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}. Validar. {ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        sbRespuesta.AppendLine($"Error en la generación de retenciones. Validar. {ex.Message}");
+                    }
+                }
+
+                /* Envío de Email */
+                try
+                {
+                    await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);
+                    sbRespuesta.AppendLine("El envío del email fue correcto.");
+                }
+                catch (Exception ex)
+                {
+                    sbRespuesta.AppendLine($"Se generó el reporte, sin embargo el envío del email falló por: {ex.Message}");
+                }
+
+                response.Success = true;
+                response.Message = sbRespuesta.ToString();
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error en llamado a generación de reporte: {ex.Message}. \n{ex}";
+                return response;
+            }
+            finally
+            {
+                foreach (var stream in streamsDictionary)
+                {
+                    stream.Value.Dispose();
+                }
+            }
+        }
+
+        public async Task<GenerarReporteResponse> GenerarRetenciones(List<RetencionModel> retenciones)
+        {
+            GenerarReporteResponse response = new GenerarReporteResponse()
+            {
+                Success = false,
+                Message = ""
+            };
+
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            try
+            {
+                foreach (var retencion in retenciones)
+                {
+                    try
+                    {
+                        await GenerarReporteRetencion(retencion);
+
+                        string nombreArchivoRet = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
+                        response.ArchivosGenerados.Add(nombreArchivoRet);
+
+                        sb.AppendLine($"Se generó la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion}.");
+                        i++;
+                    }
+                    catch (Exception ex)
+                    {
+                        sb.AppendLine($"Error al generar la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion} - {ex.Message}.");
+                    }
+                }
+                string msg = sb.ToString();
+                if (i == 0)
+                {
+                    throw new Exception($"No se generaron las retenciones: {msg}");
+                }
+
+                response.Success = true;
+                response.Message = sb.ToString();
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error en llamado a generación de reporte de retención: {ex.Message}. \n{ex}";
+                return response;
+            }
+        }
     }
 }

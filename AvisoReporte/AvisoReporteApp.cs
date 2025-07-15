@@ -78,82 +78,7 @@ namespace AvisoReporte
                 };
 
                 // Enviar información a CinetReportManager:
-                var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
-
-                // Generación de Log para aviso a usuario:
-                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error: {ex.Message}");
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task AvisoRegenerarReporte(string num_comprobante, string cod_proveedor, bool enviaEmail = true)
-        {
-            try
-            {
-                /* Obtener registros desde la base de datos: */
-
-                // Obtener los datos de la Orden de pago
-                OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail, true);
-
-                // Si la orden de pago es null, se lanza excepción
-                if (opa is null) throw new Exception("No se encontró una orden de pago");
-
-                // Obtener los datos de las retenciones
-                List<RetencionModel> retenciones = new();
-                try
-                {
-                    retenciones = await _datosReportesRetencionesServices.ObtenerRetencion(opa);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"Mensaje - {cod_proveedor} - {num_comprobante} - {ex.Message}");
-                }
-
-                // Se guardan los datos en llamadoDto, que es el modelo que se enviará a CinetReportManager
-                LlamadoDto llamadoDto = new LlamadoDto()
-                {
-                    BaseEmpresa = _conn.Base_Odbc ?? null,
-                    OrdenDePago = opa,
-                    Retenciones = retenciones is not null ? retenciones : null
-                };
-
-                // Enviar información a CinetReportManager:
-                var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
-
-                // Generación de Log para aviso a usuario:
-                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error: {ex.Message}");
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task AvisoOrdenDePago(string num_comprobante, string cod_proveedor, bool enviaEmail = true)
-        {
-            try
-            {
-                OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, enviaEmail, true);
-
-                if (opa == null) throw new Exception("No se encontró una orden de pago");
-
-                LlamadoDto llamadoDto = new LlamadoDto()
-                {
-                    BaseEmpresa = _conn.Base_Odbc ?? null,
-                    OrdenDePago = opa,
-                    Retenciones = null
-                };
-
-                var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
-
-                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
+                await _envioService.LlamadoApiCinetReportManager(llamadoDto);
             }
             catch (Exception ex)
             {
@@ -173,9 +98,7 @@ namespace AvisoReporte
 
                 List<RetencionModel> retenciones = await _datosReportesRetencionesServices.ObtenerRetencion(opa, cod_retencion);
 
-                var respuestaLlamado = await _envioService.LlamadoApiCinetReportManager(retenciones);
-
-                Log.Information($"Se hizo el llamado correctamente: \n{respuestaLlamado}");
+                await _envioService.LlamadoApiCinetReportManager(retenciones);
             }
             catch (Exception ex)
             {

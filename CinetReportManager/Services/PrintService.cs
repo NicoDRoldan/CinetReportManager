@@ -16,7 +16,7 @@ namespace CinetReportManager.Services
             }
             catch(Exception ex)
             {
-                throw new Exception("Error al imprimir");
+                throw new Exception($"Error al imprimir: {ex}");
             }
         }
     }

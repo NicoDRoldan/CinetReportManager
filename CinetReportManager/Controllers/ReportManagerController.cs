@@ -33,108 +33,39 @@ namespace CinetReportManager.Controllers
         [HttpPost("GenerarReporte")]
         public async Task<IActionResult> GenerarReporte([FromBody] LlamadoDto llamadoDto)
         {
-            List<MemoryStream> streams = new List<MemoryStream>();
-            Dictionary<string, Stream> streamsDictionary = new Dictionary<string, Stream>();
-
-            StringBuilder sb = new StringBuilder();
-
             try
             {
-                streamsDictionary[$"{llamadoDto.OrdenDePago.CodigoComprobante}_{llamadoDto.OrdenDePago.NumeroComprobanteOPA}.pdf"] = await _reportService.GenerarReporteOrdenDePago(llamadoDto.OrdenDePago, llamadoDto.BaseEmpresa);
+                var respuestaGeneracionReporte = await _reportService.GenerarReporte(llamadoDto);
 
-                if (!streamsDictionary.Any()) throw new Exception("Error al generar el reporte de la orden de pago.");
-
-                sb.AppendLine($"Se generó el reporte del comprobante {llamadoDto.OrdenDePago.CodigoComprobante} número {llamadoDto.OrdenDePago.NumeroComprobanteOPA}.");
-
-                if (llamadoDto.Retenciones is not null && llamadoDto.Retenciones.Any())
-                {
-                    try
-                    {
-                        foreach (var retencion in llamadoDto.Retenciones)
-                        {
-                            try
-                            {
-                                string nombreArchivo = $"{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}.pdf";
-                                streamsDictionary[nombreArchivo] = await _reportService.GenerarReporteRetencion(retencion);
-                                sb.AppendLine($"La generación de la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion} fue correcta");
-                            }
-                            catch (Exception ex)
-                            {
-                                sb.AppendLine($"Error en la generación de al retención {retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.RetencionPracticada.TipoComprobante}_{retencion.RetencionPracticada.NumeroComprobante}. Validar. {ex.Message}");
-                            }
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        sb.AppendLine($"Error en la generación de retenciones. Validar. {ex.Message}");
-                    }
-                }
-
-                /* Envío de Email */
-                try
-                {
-                    await _emailService.EnviarEmailAProveedor(llamadoDto.OrdenDePago.EmailsProveedores, llamadoDto.OrdenDePago.NumeroComprobanteOPA, streamsDictionary);
-                    sb.AppendLine("El envío del email fue correcto.");
-                }
-                catch (Exception ex)
-                {
-                    sb.AppendLine($"Se generó el reporte, sin embargo el envío del email falló por: {ex.Message}");
-                }
-
-                return Ok(new
-                {
-                    Message = sb.ToString()
-                });
+                return Ok(respuestaGeneracionReporte);
             }
             catch(Exception ex)
             {
-                return BadRequest(@$"{ex.Message}");
-            }
-            finally
-            {
-                foreach(var stream in streams)
+                return StatusCode(500, new GenerarReporteResponse
                 {
-                    stream.Dispose();
-                }
+                    Success = false,
+                    Message = $"Error al generar el reporte: {ex.Message}"
+                });
             }
         }
 
         [HttpPost("GenerarRetencion")]
         public async Task<IActionResult> GenerarRetencion([FromBody] List<RetencionModel> retenciones)
         {
-            StringBuilder sb = new StringBuilder();
-            int i = 0;
             try
             {
-                foreach(var retencion in retenciones)
-                {
-                    try
-                    {
-                        await _reportService.GenerarReporteRetencion(retencion);
-                        sb.AppendLine($"Se generó la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion}.");
-                        i++;
-                    }
-                    catch (Exception ex)
-                    {
-                        sb.AppendLine($"Error al generar la retención {retencion.CodigoRetencion} - {retencion.NumeroRetencion} - {ex.Message}.");
-                    }
-                }
-                string msg = sb.ToString();
-                if (i == 0)
-                {                    
-                    throw new Exception($"No se generaron las retenciones: {msg}");
-                }
+                var respuestaGeneracionRet = await _reportService.GenerarRetenciones(retenciones);
 
-                return Ok(new
-                {
-                    Message = sb.ToString()
-                });
+                return Ok(respuestaGeneracionRet);
             }
             catch (Exception ex)
             {
-                return BadRequest(@$"{ex.Message}");
+                return StatusCode(500, new GenerarReporteResponse
+                {
+                    Success = false,
+                    Message = $"Error al generar los reportes de retenciones: {ex.Message}"
+                });
             }
         }
-
     }
 }
