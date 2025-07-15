@@ -50,12 +50,6 @@ namespace AvisoReporte.Services
                     if (respuestaApi.Success)
                     { 
                         Log.Information(respuestaApi.Message);
-                        Log.Information($"Archivos Generados:");
-
-                        foreach(var archivo in respuestaApi.ArchivosGenerados)
-                        {
-                            Log.Information($"{archivo}");
-                        }
 
                         return respuestaApi;
                     }
@@ -89,12 +83,6 @@ namespace AvisoReporte.Services
                 if (respuestaMsg.IsSuccessStatusCode)
                 {
                     Log.Information(respuestaApi.Message);
-                    Log.Information($"Archivos Generados:");
-
-                    foreach (var archivo in respuestaApi.ArchivosGenerados)
-                    {
-                        Log.Information($"{archivo}");
-                    }
 
                     return respuestaApi;
                 }

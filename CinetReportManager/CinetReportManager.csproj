@@ -4,9 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.4.3.0</AssemblyVersion>
+    <AssemblyVersion>1.4.4.0</AssemblyVersion>
     <ApplicationIcon>Icono_Cinet.ico</ApplicationIcon>
-    <FileVersion>1.4.3.0</FileVersion>
+    <FileVersion>1.4.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -21,7 +21,7 @@ namespace AvisoReporte.Services
             {
                 foreach (var rutaReporte in rutaReportesPdf)
                 {
-                    Log.Information($"Mandando a imprimir primer reporte: ");
+                    Log.Information($"Mandando a imprimir primer reporte: {rutaReporte}");
 
                     var psi = new ProcessStartInfo
                     {
@@ -38,7 +38,7 @@ namespace AvisoReporte.Services
                         Log.Error($"Error en proceso de impresión: {ex.Message}");
                     }
 
-                    Log.Information($"Se imprimó el primer reporte: ");
+                    Log.Information($"Se imprimó el primer reporte.");
                 }
             }
             catch (Exception ex)
