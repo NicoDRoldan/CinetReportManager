@@ -4,6 +4,7 @@ using AvisoReporte.Models.Comprobante;
 using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using Serilog;
+using System.Configuration;
 
 namespace AvisoReporte
 {
@@ -14,6 +15,10 @@ namespace AvisoReporte
         private readonly IDatosReporteService _datosReporteService;
         private readonly IDatosReportesRetencionesServices _datosReportesRetencionesServices;
         private readonly IPrintService _printService;
+
+        private readonly bool _imprimeConfig = string.IsNullOrEmpty(ConfigurationManager.AppSettings["ImprimirReportes"])
+            ? false
+            : ConfigurationManager.AppSettings["ImprimirReportes"] == "S" ? true : false;
 
         public AvisoReporteApp (DBConnect conn, IEnvioService envioService ,IDatosReporteService datosReporteService, IDatosReportesRetencionesServices datosReportesRetencionesServices, IPrintService printService)
         {
@@ -71,7 +76,8 @@ namespace AvisoReporte
                 var respuestaApi = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
 
                 // Proceso de impresión:
-                await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
+                if(_imprimeConfig)
+                    await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
             }
             catch (Exception ex)
             {
@@ -94,7 +100,8 @@ namespace AvisoReporte
                 var respuestaApi = await _envioService.LlamadoApiCinetReportManager(retenciones);
 
                 // Proceso de impresión:
-                await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
+                if (_imprimeConfig)
+                    await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
             }
             catch (Exception ex)
             {
