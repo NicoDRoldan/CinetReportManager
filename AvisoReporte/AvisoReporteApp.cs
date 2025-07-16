@@ -88,6 +88,8 @@ namespace AvisoReporte
 
                 if(respuestaApi.ArchivosGenerados.Any())
                     await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
+
+                Log.Information($"*-----------------------------------------------------------*");
             }
             catch (Exception ex)
             {
