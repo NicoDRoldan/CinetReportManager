@@ -8,6 +8,6 @@ namespace AvisoReporte.Interfaces
 {
     public interface IPrintService
     {
-        Task ImprimirReporte(List<string> rutaReportesPdf);
+        Task LlamadoImpresion(List<string> archivosGenerados);
     }
 }

@@ -16,9 +16,6 @@ namespace AvisoReporte
         private readonly IDatosReportesRetencionesServices _datosReportesRetencionesServices;
         private readonly IPrintService _printService;
 
-        private readonly bool _imprimeOpas = (ConfigurationManager.AppSettings["ImprimirOpas"]?.ToUpper() ?? "") == "S";
-        private readonly bool _imprimeRetenciones = (ConfigurationManager.AppSettings["ImprimirRetenciones"]?.ToUpper() ?? "") == "S";
-
         public AvisoReporteApp (DBConnect conn, IEnvioService envioService ,IDatosReporteService datosReporteService, IDatosReportesRetencionesServices datosReportesRetencionesServices, IPrintService printService)
         {
             _conn = conn;
@@ -75,19 +72,7 @@ namespace AvisoReporte
                 var respuestaApi = await _envioService.LlamadoApiCinetReportManager(llamadoDto);
 
                 // Proceso de impresión:
-                List<string> reportesOpasGenerados = respuestaApi.ArchivosGenerados.Where(r => !r.ToUpper().Contains("RETENCIONES")).ToList();
-                List<string> reportesRetencionesGenerados = respuestaApi.ArchivosGenerados.Where(r => r.ToUpper().Contains("RETENCIONES")).ToList();
-
-                respuestaApi.ArchivosGenerados.Clear();
-
-                if (_imprimeOpas)
-                    respuestaApi.ArchivosGenerados.AddRange(reportesOpasGenerados);
-
-                if (_imprimeRetenciones)
-                    respuestaApi.ArchivosGenerados.AddRange(reportesRetencionesGenerados);
-
-                if(respuestaApi.ArchivosGenerados.Any())
-                    await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
+                await _printService.LlamadoImpresion(respuestaApi.ArchivosGenerados);
 
                 Log.Information($"*-----------------------------------------------------------*");
             }
@@ -112,8 +97,7 @@ namespace AvisoReporte
                 var respuestaApi = await _envioService.LlamadoApiCinetReportManager(retenciones);
 
                 // Proceso de impresión:
-                if (_imprimeRetenciones)
-                    await _printService.ImprimirReporte(respuestaApi.ArchivosGenerados);
+                await _printService.LlamadoImpresion(respuestaApi.ArchivosGenerados);
             }
             catch (Exception ex)
             {
