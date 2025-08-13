@@ -57,7 +57,7 @@ namespace AvisoReporte.Services
                     if (egrc_tipo == "M")
                         cod_concepto = await _accesoDatosService.ObtenerCodigoConcepto(ordenDePago.CodigoProveedor, "IBMENDOZA");
 
-                    DataTable datosRetencion = await _accesoDatosService.ObtenerDatosRetencion(cod_concepto);
+                    DataTable datosRetencion = await _accesoDatosService.ObtenerDatosRetencion(cod_concepto, retencionFiltro);
                     DataTable datosProveedor = await _accesoDatosService.ObtenerDatosProveedor(ordenDePago.CodigoProveedor);
 
                     RetencionModel ret = await _mapeoDatosService.MapeoRetenciones(cod_concepto, num_retencion, 

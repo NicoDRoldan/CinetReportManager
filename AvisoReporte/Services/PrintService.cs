@@ -40,7 +40,10 @@ namespace AvisoReporte.Services
                     foreach(var retencion in retencionesArray)
                     {
                         var nombreRet = string.Concat(retencion, "_");
-                        archivosAImprimir.Add(archivosGenerados.Where(r => r.Contains(nombreRet)).FirstOrDefault()!);
+                        var rutaArchivo = archivosGenerados.Where(r => r.Contains(nombreRet)).FirstOrDefault();
+
+                        if(!string.IsNullOrEmpty(rutaArchivo))
+                            archivosAImprimir.Add(rutaArchivo);
                     }
                 }
                 else if (!string.IsNullOrEmpty(_retencionesAImprimir))

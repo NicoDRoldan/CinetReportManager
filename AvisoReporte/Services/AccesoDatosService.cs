@@ -116,12 +116,20 @@ namespace AvisoReporte.Services
             }
         }
 
-        public async Task<DataTable> ObtenerDatosRetencion(string cod_concepto)
+        public async Task<DataTable> ObtenerDatosRetencion(string cod_concepto, string? cod_retencion = null)
         {
             try
             {
                 List<string> parametros = new List<string> { cod_concepto };
+
                 string consulta = @$"SELECT RTRIM(RETEN_CODIGO) [RETEN_CODIGO], RETEN_CODCONCEPTO, RETEN_DESCCONCEPTO FROM RETEN_TABLA WHERE RETEN_CODCONCEPTO = ? ";
+
+                if (!string.IsNullOrEmpty(cod_retencion))
+                {
+                    parametros.Add(cod_retencion);
+                    consulta = @$"SELECT RTRIM(RETEN_CODIGO) [RETEN_CODIGO], RETEN_CODCONCEPTO, RETEN_DESCCONCEPTO FROM RETEN_TABLA WHERE RETEN_CODCONCEPTO = ? AND RETEN_CODIGO = ? ";
+                }
+
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametros);
                 return registros;
             }
