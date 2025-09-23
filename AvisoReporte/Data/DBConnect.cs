@@ -16,7 +16,8 @@ namespace AvisoReporte.Data
         private static string User_Odbc { get; set; }
         private static string Pass_Odbc { get; set; }
         private static string Tipo_Conexion_Config { get; set; }
-        public string Empresa_Config { get; set; }
+        public static string Empresa_Config { get; set; }
+        public static string Empresa_Sec { get; set; }
         public bool UsaConfig { get; set; } = true;
 
         public async Task<string> ObtenerStringConexion()
@@ -41,8 +42,6 @@ namespace AvisoReporte.Data
                 default:
                     throw new Exception("No se estableció la conexión.");
             }
-
-            Empresa_Config = ConfigurationManager.AppSettings["Empresa"] is null ? "2" : ConfigurationManager.AppSettings["Empresa"];
 
             switch (Empresa_Config)
             {

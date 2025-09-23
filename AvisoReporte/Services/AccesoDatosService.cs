@@ -23,8 +23,9 @@ namespace AvisoReporte.Services
 
         public async Task<DataTable> ObtenerDatosDeComprobante(List<string> parametros, bool esConsulta = false)
         {
-            var consulta = @$"SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
-                                    WHERE ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? ;";
+            var consulta = @$"SET DATEFORMAT DMY 
+                                    SELECT CBTEEG_CODIGO, EGRE_NUMERO, CBTEEGSUC_CODIGO, EGRE_FECHA, PRO_CODIGO FROM EGRESOS_E 
+                                    WHERE EGRE_FECHA >= '01-01-2025' AND ETAL_CODIGO = '01' AND CBTEEG_CODIGO = ? AND EGRE_NUMERO = ? AND CBTEEGSUC_CODIGO = ? ;";
 
             var resultado = await _conn.ObtenerRegistrosAsync(consulta, parametros);
 

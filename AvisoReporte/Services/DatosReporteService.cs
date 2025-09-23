@@ -35,6 +35,8 @@ namespace AvisoReporte.Services
             try
             {
                 DataTable datosComprobante = await _accesoDatosService.ObtenerDatosDeComprobante(parametros, esConsulta);
+                if (datosComprobante is null || datosComprobante.Rows.Count == 0)
+                    throw new Exception($"Comprobante {cod_Comprobante} - Número {num_Comprobante} - No se encontraron comprobantes.");
                 DataTable datosProveedor = await _accesoDatosService.ObtenerDatosDeProveedor(cod_Proveedor);
                 DataTable datosLiquidaciones = await _accesoDatosService.ObtenerDatosDeLiquidacion(parametros, cod_Proveedor);
                 DataTable datosLiquidacionPlanCodigo = new();
@@ -46,7 +48,10 @@ namespace AvisoReporte.Services
 
                 ClavesComprobantesModel claves = new ClavesComprobantesModel
                 {
-                    Cod_Comprobante = cod_Comprobante, Num_Comprobante = num_Comprobante, Cod_Sucursal = cod_Sucursal, Cod_Proveedor = cod_Proveedor 
+                    Cod_Comprobante = cod_Comprobante,
+                    Num_Comprobante = num_Comprobante,
+                    Cod_Sucursal = cod_Sucursal,
+                    Cod_Proveedor = cod_Proveedor
                 };
 
                 OrdenDePagoModel ordenDePago = await _mapeoDatosService.MapeoOrdenDePago(datosComprobante, datosProveedor, datosLiquidaciones, datosLiquidacionPlanCodigo, datosValoresIng, datosValoresEgr, claves, enviaEmail, esConsulta);
@@ -57,6 +62,6 @@ namespace AvisoReporte.Services
             {
                 throw new Exception($"Error al obtener datos: {ex.Message}");
             }
-        }      
+        }
     }
 }

@@ -4,6 +4,7 @@ using AvisoReporte.Models.Comprobante;
 using AvisoReporte.Models.DTO;
 using AvisoReporte.Models.Retenciones;
 using Serilog;
+using System;
 using System.Configuration;
 
 namespace AvisoReporte
@@ -43,10 +44,26 @@ namespace AvisoReporte
                 /* Obtener registros desde la base de datos: */
 
                 // Obtener los datos de la Orden de pago
-                OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago(ComprobanteDto.Cod_Comprobante, ComprobanteDto.Nro_Comprobante, ComprobanteDto.Nro_Sucursal, ComprobanteDto.Cod_Proveedor, enviaEmail);
+                OrdenDePagoModel opa = null;
 
-                // Si la orden de pago es null, se lanza excepción
+                try
+                {
+                    opa = await _datosReporteService
+                    .ObtenerOrdenDePago(ComprobanteDto.Cod_Comprobante, ComprobanteDto.Nro_Comprobante, ComprobanteDto.Nro_Sucursal, ComprobanteDto.Cod_Proveedor, enviaEmail);
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex.Message);
+                }
+
+                // Si la orden de pago es null, se intenta con la otra empresa
+                if (opa is null)
+                {
+                    DBConnect.Empresa_Config = DBConnect.Empresa_Sec;
+                    opa = await _datosReporteService
+                    .ObtenerOrdenDePago(ComprobanteDto.Cod_Comprobante, ComprobanteDto.Nro_Comprobante, ComprobanteDto.Nro_Sucursal, ComprobanteDto.Cod_Proveedor, enviaEmail);
+                }
+                
                 if (opa is null) throw new Exception("No se encontró una orden de pago");
 
                 // Obtener los datos de las retenciones
@@ -87,10 +104,28 @@ namespace AvisoReporte
         {
             try
             {
-                OrdenDePagoModel opa = await _datosReporteService
-                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, false, true);
+                // Obtener los datos de la Orden de pago
+                OrdenDePagoModel opa = null;
 
-                if (opa == null) throw new Exception("No se encontró una orden de pago");
+                try
+                {
+                    opa = await _datosReporteService
+                        .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, false, true);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.Message);
+                }
+
+                // Si la orden de pago es null, se intenta con la otra empresa
+                if (opa is null)
+                {
+                    DBConnect.Empresa_Config = DBConnect.Empresa_Sec;
+                    opa = await _datosReporteService
+                    .ObtenerOrdenDePago("OPA", num_comprobante, "0121", cod_proveedor, false, true);
+                }
+
+                if (opa is null) throw new Exception("No se encontró una orden de pago");
 
                 List<RetencionModel> retenciones = await _datosReportesRetencionesServices.ObtenerRetencion(opa, cod_retencion);
 
