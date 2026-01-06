@@ -61,8 +61,8 @@ namespace CinetReportManager.Services
             string rutaCarpetaRaiz = @$"{_rutaReporte}";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
 
-            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
-            string rataCarpeta = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\{_codComprobante}{_numeroComprobante}.pdf";
+            string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}";
 
             if (!Directory.Exists(rataCarpeta)) Directory.CreateDirectory(rataCarpeta);
 
@@ -81,7 +81,19 @@ namespace CinetReportManager.Services
                         doc.SetMargins(110, 15, 240, 5); /* Se setea el margen del documento (pdf) */
 
                         /* Se obtiene la imagen y fuente del proyecto compilado */
-                        var rutaImagenLogo = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.LogoMostaza.bmp");
+                        byte[] rutaImagenLogo;
+
+                        var rutaImagenLogoConfig = _configuration["Parametros:RutaImagenLogo"];
+
+                        if (!string.IsNullOrWhiteSpace(rutaImagenLogoConfig) && File.Exists(rutaImagenLogoConfig))
+                        {
+                            rutaImagenLogo = await File.ReadAllBytesAsync(rutaImagenLogoConfig);
+                        }
+                        else
+                        {
+                            rutaImagenLogo = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Images.LogoMostaza.bmp");
+                        }
+
                         var rutaFont = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.TYPEWR_B.TTF");
                         var fontCourierNewRegular = await Funciones.ObtenerRecurso("CinetReportManager.Resources.Fonts.CourierNewRegular.ttf");
 
@@ -162,9 +174,9 @@ namespace CinetReportManager.Services
             _codComprobante = retencion.RetencionPracticada.TipoComprobante;
             _codProveedor = retencion.SujetoRetenido.CodigoProveedor;
 
-            string rutaCarpetaRaiz = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones";
+            string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"{_rutaReporte}\Proveedor_{_codProveedor}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.CodigoConcepto}_{_codComprobante}_{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.CodigoConcepto}_{_codComprobante}{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {

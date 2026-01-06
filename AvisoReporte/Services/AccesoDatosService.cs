@@ -82,9 +82,11 @@ namespace AvisoReporte.Services
             var parametrosAdd = new List<string>(parametros);
             try
             {
-                string consulta = @$"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C
+                string consulta = @$"SELECT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C
                                     WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
-                                    AND EGRC_NUMRET != '0' AND EGRC_CONCEPTO != '' ";
+                                    AND EGRC_NUMRET != '0' AND EGRC_CONCEPTO != '' 
+                                    GROUP BY EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) 
+                                    HAVING MIN(EGRC_IMPORTE) > 0 ";
 
                 if (!string.IsNullOrEmpty(retencionFiltro))
                 {
@@ -98,10 +100,12 @@ namespace AvisoReporte.Services
                     else
                     {
                         parametrosAdd.Add(retencionFiltro);
-                        consulta = $@"SELECT DISTINCT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C C 
+                        consulta = $@"SELECT EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1) AS EGRC_TIPO FROM EGRESOS_C C  
                                     INNER JOIN RETEN_TABLA r ON r.RETEN_CODCONCEPTO = c.EGRC_CONCEPTO 
                                     WHERE CBTEEG_CODIGO = ? and EGRE_NUMERO = ? and CBTEEGSUC_CODIGO = ? 
-                                    AND EGRC_NUMRET != '0' AND RETEN_CODIGO = ? ";
+                                    AND EGRC_NUMRET != '0' AND RETEN_CODIGO = ? 
+                                    GROUP BY EGRC_NUMRET, EGRC_CONCEPTO, SUBSTRING(EGRC_TIPO, 1, 1)
+                                    HAVING MIN(EGRC_IMPORTE) > 0 ";
                     }
                 }
                 DataTable registros = await _conn.ObtenerRegistrosAsync(consulta, parametrosAdd);

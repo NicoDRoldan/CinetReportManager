@@ -40,6 +40,7 @@ builder.Services.AddTransient<IOrdenDePagoService, OrdenDePagoService>();
 builder.Services.AddTransient<IRetencionService, RetencionService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPrintService, PrintService>();
+builder.Services.AddScoped<ITemplateService, TemplateService>();
 
 var app = builder.Build();
 

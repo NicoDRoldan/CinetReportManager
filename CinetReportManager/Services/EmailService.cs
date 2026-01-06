@@ -2,6 +2,7 @@
 using CinetReportManager.Interfaces;
 using CinetReportManager.Models;
 using System.Net;
+using System.Net.Http;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Reflection;
@@ -12,11 +13,13 @@ namespace CinetReportManager.Services
     {
         private readonly IConfiguration _configuration;
         private readonly EmailModel _emailModel;
+        private readonly ITemplateService _templateService;
 
-        public EmailService (IConfiguration configuration, EmailModel emailModel)
+        public EmailService(IConfiguration configuration, EmailModel emailModel, ITemplateService templateService)
         {
             _configuration = configuration;
             _emailModel = emailModel;
+            _templateService = templateService;
         }
 
         public async Task EnviarEmailAProveedor(List<string> emailsProveedores, string nroComprobanteOpa, Dictionary<string, Stream> streamsDictionary)
@@ -30,6 +33,8 @@ namespace CinetReportManager.Services
             }
 
             if (!ValidarEmails(emailsProveedores)) throw new Exception("Se generó el reporte pero no hay emails para hacer el envío.");
+
+            MemoryStream? msImagen = null;
 
             try
             {
@@ -53,7 +58,22 @@ namespace CinetReportManager.Services
 
                 // Convertir Body en HTML
                 message.IsBodyHtml = true;
-                string bodyHtml = $@"
+                string bodyHtml = _configuration["Parametros:RutaHtml"] ?? "";
+
+                if (!string.IsNullOrEmpty(bodyHtml) && File.Exists(bodyHtml))
+                {
+                    bodyHtml = File.ReadAllText(bodyHtml);
+
+                    Dictionary<string, string> placeholders = new()
+                    {
+                        { "nroComprobanteOpa", nroComprobanteOpa }
+                    };
+
+                    bodyHtml = await _templateService.ApplyPlaceholdersAsync(bodyHtml, placeholders);
+                }
+                else
+                {
+                    bodyHtml = $@"
                     <html>
                     <body>
                         <h1>Orden de pago {nroComprobanteOpa}</h1>
@@ -63,22 +83,64 @@ namespace CinetReportManager.Services
                         <img src='cid:mostaza-logo' alt='Imagen' style='width:100px; height:80px;'>
                     </html>
                     </body>";
+                }
+
+                var htmlView = AlternateView.CreateAlternateViewFromString(bodyHtml, null, "text/html");
 
                 // Agregar imagen al HTML
-                using Stream streamImagen = Assembly.GetExecutingAssembly().GetManifestResourceStream("CinetReportManager.Resources.Images.LogoMostaza.bmp") ?? throw new Exception("Error la cargar el recurso");
-                using MemoryStream rutaImagen = new MemoryStream();
-                streamImagen.CopyTo(rutaImagen);
-                rutaImagen.Position = 0;
-                var imagen = new LinkedResource(rutaImagen, MediaTypeNames.Image.Jpeg)
-                {
-                    ContentId = "mostaza-logo"
-                };
-                var avHtml = AlternateView.CreateAlternateViewFromString(bodyHtml, null, MediaTypeNames.Text.Html);
-                avHtml.LinkedResources.Add(imagen);
-                message.AlternateViews.Add(avHtml);
 
-               // Agregar archivos adjuntos
-                foreach(var dic in streamsDictionary)
+                var rutaImagen = _configuration["Parametros:RutaImagenLogo"] ?? "";
+
+                if (!string.IsNullOrEmpty(rutaImagen) && File.Exists(rutaImagen))
+                {
+                    rutaImagen = rutaImagen.Trim()
+                            .Replace("\u200E", "") // LRM
+                            .Replace("\u200F", "") // RLM
+                            .Replace("\u202A", "") // LRE
+                            .Replace("\u202B", "") // RLE
+                            .Replace("\u202C", "") // PDF
+                            .Replace("\u202D", "") // LRO
+                            .Replace("\u202E", "") // RLO
+                            .Replace("\u2066", "") // LRI
+                            .Replace("\u2067", "") // RLI
+                            .Replace("\u2068", "") // FSI
+                            .Replace("\u2069", "") // PDI
+                            .Replace("\uFEFF", ""); // BOM / ZWNBSP
+
+                    var imagen = new LinkedResource(rutaImagen)
+                    {
+                        ContentId = "mostaza-logo",
+                        TransferEncoding = TransferEncoding.Base64,
+                        ContentType =
+                            {
+                                Name = $"image/{Path.GetExtension(rutaImagen).ToLowerInvariant()}"
+                            }
+                    };
+                    htmlView.LinkedResources.Add(imagen);
+                }
+                else
+                {
+                    using var streamImagen = Assembly.GetExecutingAssembly()
+                        .GetManifestResourceStream("CinetReportManager.Resources.Images.LogoMostaza.bmp")
+                        ?? throw new Exception("Error al cargar el recurso");
+
+                    msImagen = new MemoryStream();
+                    streamImagen.CopyTo(msImagen);
+                    msImagen.Position = 0;
+
+                    var lr = new LinkedResource(msImagen)
+                    {
+                        ContentId = "mostaza-logo",
+                        TransferEncoding = TransferEncoding.Base64,
+                    };
+                    lr.ContentType.MediaType = "image/bmp";
+                    htmlView.LinkedResources.Add(lr);
+                }
+
+                message.AlternateViews.Add(htmlView);
+
+                // Agregar archivos adjuntos
+                foreach (var dic in streamsDictionary)
                 {
                     var nombreArchivo = dic.Key;
                     var stream = dic.Value;
@@ -91,6 +153,10 @@ namespace CinetReportManager.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error en envío de email: {ex.Message}");
+            }
+            finally
+            {
+                msImagen?.Dispose();
             }
         }
 
