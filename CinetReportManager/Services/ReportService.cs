@@ -61,7 +61,7 @@ namespace CinetReportManager.Services
             string rutaCarpetaRaiz = @$"{_rutaReporte}";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
 
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\{_codComprobante}{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}.pdf";
             string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}";
 
             if (!Directory.Exists(rataCarpeta)) Directory.CreateDirectory(rataCarpeta);
