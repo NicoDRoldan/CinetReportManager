@@ -61,8 +61,8 @@ namespace CinetReportManager.Services
             string rutaCarpetaRaiz = @$"{_rutaReporte}";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
 
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}.pdf";
-            string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\{_codComprobante}_{_numeroComprobante}.pdf";
+            string rataCarpeta = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}";
 
             if (!Directory.Exists(rataCarpeta)) Directory.CreateDirectory(rataCarpeta);
 
@@ -174,9 +174,9 @@ namespace CinetReportManager.Services
             _codComprobante = retencion.RetencionPracticada.TipoComprobante;
             _codProveedor = retencion.SujetoRetenido.CodigoProveedor;
 
-            string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\Retenciones";
+            string rutaCarpetaRaiz = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones";
             if (!Directory.Exists(rutaCarpetaRaiz)) Directory.CreateDirectory(rutaCarpetaRaiz);
-            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.CodigoConcepto}_{_codComprobante}{_numeroComprobante}.pdf";
+            string rutaArchivo = @$"{_rutaReporte}\{_codComprobante}_{_numeroComprobante}\Retenciones\Retencion_{retencion.CodigoRetencion}_{retencion.NumeroRetencion}_{retencion.CodigoConcepto}_{_codComprobante}_{_numeroComprobante}.pdf";
             var stream = new MemoryStream();
             try
             {
